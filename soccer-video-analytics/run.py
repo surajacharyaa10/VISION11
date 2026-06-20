@@ -158,8 +158,10 @@ for i, frame in enumerate(video):
             img=frame, passes=pass_list, coord_transformations=coord_transformations
         )
 
+        pass_y_offset = 260 if args.possession else 0
+
         frame = match.draw_passes_counter(
-            frame, counter_background=passes_background, debug=False
+            frame, counter_background=passes_background, debug=False, y_offset=pass_y_offset
         )
 
     frame = np.array(frame)

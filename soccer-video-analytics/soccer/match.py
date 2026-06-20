@@ -649,6 +649,7 @@ class Match:
         frame: PIL.Image.Image,
         counter_background: PIL.Image.Image,
         debug: bool = False,
+        y_offset: int = 0,
     ) -> PIL.Image.Image:
         """
 
@@ -662,6 +663,8 @@ class Match:
             Counter background
         debug : bool, optional
             Whether to draw extra debug information, by default False
+        y_offset : int, optional
+            Vertical offset for the counter, by default 0
 
         Returns
         -------
@@ -671,7 +674,7 @@ class Match:
 
         # get width of PIL.Image
         frame_width = frame.size[0]
-        counter_origin = (frame_width - 540, 40)
+        counter_origin = (frame_width - 540, 40 + y_offset)
 
         frame = self.draw_counter_background(
             frame,
