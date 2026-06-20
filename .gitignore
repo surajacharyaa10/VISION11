@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+backend/data/
+frontend/node_modules/
+frontend/.next/
+.DS_Store
+inputs_data/002.mp4
+output_videos/
+.venv/
