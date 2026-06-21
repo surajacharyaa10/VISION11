@@ -4,10 +4,10 @@ from typing import Any, Optional
 from torch import nn
 
 from ...transforms._presets import SemanticSegmentation
-from .._api import WeightsEnum, Weights
+from .._api import register_model, Weights, WeightsEnum
 from .._meta import _VOC_CATEGORIES
-from .._utils import IntermediateLayerGetter, handle_legacy_interface, _ovewrite_value_param
-from ..resnet import ResNet, ResNet50_Weights, ResNet101_Weights, resnet50, resnet101
+from .._utils import _ovewrite_value_param, handle_legacy_interface, IntermediateLayerGetter
+from ..resnet import ResNet, resnet101, ResNet101_Weights, resnet50, ResNet50_Weights
 from ._utils import _SimpleSegmentationModel
 
 
@@ -71,6 +71,8 @@ class FCN_ResNet50_Weights(WeightsEnum):
                     "pixel_acc": 91.4,
                 }
             },
+            "_ops": 152.717,
+            "_file_size": 135.009,
         },
     )
     DEFAULT = COCO_WITH_VOC_LABELS_V1
@@ -90,6 +92,8 @@ class FCN_ResNet101_Weights(WeightsEnum):
                     "pixel_acc": 91.9,
                 }
             },
+            "_ops": 232.738,
+            "_file_size": 207.711,
         },
     )
     DEFAULT = COCO_WITH_VOC_LABELS_V1
@@ -110,6 +114,7 @@ def _fcn_resnet(
     return FCN(backbone, classifier, aux_classifier)
 
 
+@register_model()
 @handle_legacy_interface(
     weights=("pretrained", FCN_ResNet50_Weights.COCO_WITH_VOC_LABELS_V1),
     weights_backbone=("pretrained_backbone", ResNet50_Weights.IMAGENET1K_V1),
@@ -154,8 +159,8 @@ def fcn_resnet50(
 
     if weights is not None:
         weights_backbone = None
-        num_classes = _ovewrite_value_param(num_classes, len(weights.meta["categories"]))
-        aux_loss = _ovewrite_value_param(aux_loss, True)
+        num_classes = _ovewrite_value_param("num_classes", num_classes, len(weights.meta["categories"]))
+        aux_loss = _ovewrite_value_param("aux_loss", aux_loss, True)
     elif num_classes is None:
         num_classes = 21
 
@@ -163,11 +168,12 @@ def fcn_resnet50(
     model = _fcn_resnet(backbone, num_classes, aux_loss)
 
     if weights is not None:
-        model.load_state_dict(weights.get_state_dict(progress=progress))
+        model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
 
     return model
 
 
+@register_model()
 @handle_legacy_interface(
     weights=("pretrained", FCN_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1),
     weights_backbone=("pretrained_backbone", ResNet101_Weights.IMAGENET1K_V1),
@@ -212,8 +218,8 @@ def fcn_resnet101(
 
     if weights is not None:
         weights_backbone = None
-        num_classes = _ovewrite_value_param(num_classes, len(weights.meta["categories"]))
-        aux_loss = _ovewrite_value_param(aux_loss, True)
+        num_classes = _ovewrite_value_param("num_classes", num_classes, len(weights.meta["categories"]))
+        aux_loss = _ovewrite_value_param("aux_loss", aux_loss, True)
     elif num_classes is None:
         num_classes = 21
 
@@ -221,18 +227,6 @@ def fcn_resnet101(
     model = _fcn_resnet(backbone, num_classes, aux_loss)
 
     if weights is not None:
-        model.load_state_dict(weights.get_state_dict(progress=progress))
+        model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
 
     return model
-
-
-# The dictionary below is internal implementation detail and will be removed in v0.15
-from .._utils import _ModelURLs
-
-
-model_urls = _ModelURLs(
-    {
-        "fcn_resnet50_coco": FCN_ResNet50_Weights.COCO_WITH_VOC_LABELS_V1.url,
-        "fcn_resnet101_coco": FCN_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1.url,
-    }
-)
