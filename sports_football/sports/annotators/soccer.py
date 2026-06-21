@@ -13,7 +13,7 @@ def draw_pitch(
     line_color: sv.Color = sv.Color.WHITE,
     padding: int = 50,
     line_thickness: int = 4,
-    point_radius: int = 8
+    point_radius: int = 8,
     scale: float = 0.1
 ) -> np.ndarray:
     """
@@ -38,8 +38,12 @@ def draw_pitch(
     Returns:
         np.ndarray: Image of the soccer pitch.
     """
-=
 
+
+    scaled_width = int(config.width * scale)
+    scaled_length = int(config.length * scale)
+    scaled_circle_radius = int(config.centre_circle_radius * scale)
+    scaled_penalty_spot_distance = int(config.penalty_spot_distance * scale)
 
     pitch_image = np.ones(
         (scaled_width + 2 * padding,
