@@ -15,7 +15,7 @@ Original data comes from the [DFL - Bundesliga Data Shootout](https://www.kaggle
 Kaggle competition. This data has been processed to create new datasets, which can be 
 downloaded from the [Roboflow Universe](https://universe.roboflow.com/).
 
-| use case                        | dataset                                                                                                                                                          |
+| use case                        | datasets                                                                                                                                                          |
 |:--------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | soccer player detection         | [![Download Dataset](https://app.roboflow.com/images/download-dataset-badge.svg)](https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc) |
 | soccer ball detection           | [![Download Dataset](https://app.roboflow.com/images/download-dataset-badge.svg)](https://universe.roboflow.com/roboflow-jvuqo/football-ball-detection-rejhg)    |
