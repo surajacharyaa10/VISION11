@@ -85,6 +85,7 @@ class Mode(Enum):
     PLAYER_TRACKING = 'PLAYER_TRACKING'
     TEAM_CLASSIFICATION = 'TEAM_CLASSIFICATION'
     RADAR = 'RADAR'
+    HEATMAP = 'HEATMAP'
 
 
 def get_crops(frame: np.ndarray, detections: sv.Detections) -> List[np.ndarray]:
@@ -160,6 +161,67 @@ def render_radar(
     radar = draw_points_on_pitch(
         config=CONFIG, xy=transformed_xy[color_lookup == 3],
         face_color=sv.Color.from_hex(COLORS[3]), radius=20, pitch=radar)
+    return radar
+
+
+def render_heatmap(
+    detections: sv.Detections,
+    keypoints: sv.KeyPoints,
+    color_lookup: np.ndarray,
+    accumulated_xy_team_0: List[np.ndarray],
+    accumulated_xy_team_1: List[np.ndarray]
+) -> np.ndarray:
+    mask = (keypoints.xy[0][:, 0] > 1) & (keypoints.xy[0][:, 1] > 1)
+    transformer = ViewTransformer(
+        source=keypoints.xy[0][mask].astype(np.float32),
+        target=np.array(CONFIG.vertices)[mask].astype(np.float32)
+    )
+    xy = detections.get_anchors_coordinates(anchor=sv.Position.BOTTOM_CENTER)
+    transformed_xy = transformer.transform_points(points=xy)
+
+    # Accumulate points
+    if len(transformed_xy[color_lookup == 0]) > 0:
+        accumulated_xy_team_0.append(transformed_xy[color_lookup == 0])
+    if len(transformed_xy[color_lookup == 1]) > 0:
+        accumulated_xy_team_1.append(transformed_xy[color_lookup == 1])
+
+    radar = draw_pitch(config=CONFIG)
+    h, w, _ = radar.shape
+    
+    # Create a single float32 density map
+    density_map = np.zeros((h, w), dtype=np.float32)
+    
+    # Accumulate all points onto the density map (combining both teams for overall activity)
+    for pts_array in accumulated_xy_team_0 + accumulated_xy_team_1:
+        for pt in pts_array:
+            # Scale and pad points identical to draw_points_on_pitch defaults
+            x = int(pt[0] * 0.1) + 50
+            y = int(pt[1] * 0.1) + 50
+            if 0 <= x < w and 0 <= y < h:
+                # Draw small base intensity for each point
+                cv2.circle(density_map, (x, y), 15, 1.0, -1)
+            
+    # Apply Gaussian blur for smoothness
+    if np.max(density_map) > 0:
+        # Large kernel for smooth distribution
+        density_map = cv2.GaussianBlur(density_map, (101, 101), 0)
+        
+        # Normalize to 0-255
+        density_map = cv2.normalize(density_map, None, 0, 255, cv2.NORM_MINMAX)
+        density_map = np.uint8(density_map)
+        
+        # Apply Jet colormap (Blue -> Green -> Red)
+        heatmap_colored = cv2.applyColorMap(density_map, cv2.COLORMAP_JET)
+        
+        # Create an alpha mask based on density so low-density (blue) is more transparent
+        alpha = density_map.astype(float) / 255.0
+        # Boost alpha slightly to make colors pop, but keep low values transparent
+        alpha = np.clip(alpha * 1.5, 0, 1)
+        alpha = np.repeat(alpha[:, :, np.newaxis], 3, axis=2)
+        
+        # Blend the heatmap over the original radar pitch
+        radar = (heatmap_colored * alpha + radar * (1 - alpha)).astype(np.uint8)
+    
     return radar
 
 
@@ -391,6 +453,73 @@ def run_radar(source_video_path: str, device: str) -> Iterator[np.ndarray]:
         yield annotated_frame
 
 
+def run_heatmap(source_video_path: str, device: str) -> Iterator[np.ndarray]:
+    player_detection_model = YOLO(PLAYER_DETECTION_MODEL_PATH).to(device=device)
+    pitch_detection_model = YOLO(PITCH_DETECTION_MODEL_PATH).to(device=device)
+    frame_generator = sv.get_video_frames_generator(
+        source_path=source_video_path, stride=STRIDE)
+
+    crops = []
+    for frame in tqdm(frame_generator, desc='collecting crops'):
+        result = player_detection_model(frame, imgsz=1280, verbose=False)[0]
+        detections = sv.Detections.from_ultralytics(result)
+        crops += get_crops(frame, detections[detections.class_id == PLAYER_CLASS_ID])
+
+    team_classifier = TeamClassifier(device=device)
+    team_classifier.fit(crops)
+
+    frame_generator = sv.get_video_frames_generator(source_path=source_video_path)
+    tracker = sv.ByteTrack(minimum_consecutive_frames=3)
+    
+    accumulated_xy_team_0 = []
+    accumulated_xy_team_1 = []
+    
+    for frame in frame_generator:
+        result = pitch_detection_model(frame, verbose=False)[0]
+        keypoints = sv.KeyPoints.from_ultralytics(result)
+        result = player_detection_model(frame, imgsz=1280, verbose=False)[0]
+        detections = sv.Detections.from_ultralytics(result)
+        detections = tracker.update_with_detections(detections)
+
+        players = detections[detections.class_id == PLAYER_CLASS_ID]
+        crops = get_crops(frame, players)
+        players_team_id = team_classifier.predict(crops)
+
+        goalkeepers = detections[detections.class_id == GOALKEEPER_CLASS_ID]
+        goalkeepers_team_id = resolve_goalkeepers_team_id(
+            players, players_team_id, goalkeepers)
+
+        referees = detections[detections.class_id == REFEREE_CLASS_ID]
+
+        detections = sv.Detections.merge([players, goalkeepers, referees])
+        color_lookup = np.array(
+            players_team_id.tolist() +
+            goalkeepers_team_id.tolist() +
+            [REFEREE_CLASS_ID] * len(referees)
+        )
+        labels = [str(tracker_id) for tracker_id in detections.tracker_id]
+
+        annotated_frame = frame.copy()
+        annotated_frame = ELLIPSE_ANNOTATOR.annotate(
+            annotated_frame, detections, custom_color_lookup=color_lookup)
+        annotated_frame = ELLIPSE_LABEL_ANNOTATOR.annotate(
+            annotated_frame, detections, labels,
+            custom_color_lookup=color_lookup)
+
+        h, w, _ = frame.shape
+        radar = render_heatmap(detections, keypoints, color_lookup, accumulated_xy_team_0, accumulated_xy_team_1)
+        radar = sv.resize_image(radar, (w // 2, h // 2))
+        radar_h, radar_w, _ = radar.shape
+        rect = sv.Rect(
+            x=w // 2 - radar_w // 2,
+            y=h - radar_h,
+            width=radar_w,
+            height=radar_h
+        )
+        annotated_frame = sv.draw_image(annotated_frame, radar, opacity=0.5, rect=rect)
+        yield annotated_frame
+
+
 def main(source_video_path: str, target_video_path: str, device: str, mode: Mode) -> None:
     if mode == Mode.PITCH_DETECTION:
         frame_generator = run_pitch_detection(
@@ -409,6 +538,9 @@ def main(source_video_path: str, target_video_path: str, device: str, mode: Mode
             source_video_path=source_video_path, device=device)
     elif mode == Mode.RADAR:
         frame_generator = run_radar(
+            source_video_path=source_video_path, device=device)
+    elif mode == Mode.HEATMAP:
+        frame_generator = run_heatmap(
             source_video_path=source_video_path, device=device)
     else:
         raise NotImplementedError(f"Mode {mode} is not implemented.")
