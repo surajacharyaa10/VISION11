@@ -8,3 +8,4 @@ frontend/.next/
 inputs_data/002.mp4
 output_videos/
 .venv/
+.venv
