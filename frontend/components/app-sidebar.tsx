@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +12,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
 export function AppSidebar() {
   return (
     <Sidebar className="border-r">
@@ -23,12 +24,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <a href="#">Dashboard</a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <a href="#">Analytics</a>
+                  <Link href="/TopLeagues">Top Leagues</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
