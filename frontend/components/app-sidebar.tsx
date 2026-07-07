@@ -26,7 +26,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <Link href="/TopLeagues">Top Leagues</Link>
+                  <Link href="/TopLeagues">Leagues</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
