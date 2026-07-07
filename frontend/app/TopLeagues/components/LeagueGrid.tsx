@@ -15,6 +15,20 @@ import {
   ArrowRight
 } from "lucide-react";
 
+// Renders the league logo with a graceful fallback to Trophy icon on error
+function LeagueLogo({ src, alt }: { src: string | null; alt: string }) {
+  const [errored, setErrored] = useState(false);
+  if (!src || errored) return <Trophy className="w-8 h-8 text-zinc-400" />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="object-contain max-w-full max-h-full"
+      onError={() => setErrored(true)}
+    />
+  );
+}
+
 interface CoverageItem {
   standings: boolean;
   players: boolean;
@@ -180,15 +194,7 @@ export default function LeagueGrid({ leagues, isDemo }: LeagueGridProps) {
                   <div className="flex items-start justify-between mb-5">
                     <div className="flex items-center gap-3">
                       <div className="relative w-14 h-14 p-1.5 bg-zinc-50 rounded-xl border border-zinc-150 flex items-center justify-center shadow-inner group-hover:border-emerald-500/20 transition-colors duration-300">
-                        {item.league.logo ? (
-                          <img 
-                            src={item.league.logo} 
-                            alt={item.league.name}
-                            className="object-contain max-w-full max-h-full"
-                          />
-                        ) : (
-                          <Trophy className="w-8 h-8 text-zinc-400" />
-                        )}
+                        <LeagueLogo src={item.league.logo} alt={item.league.name} />
                       </div>
                       <div>
                         <h4 className="font-bold text-zinc-900 text-base group-hover:text-emerald-600 transition-colors duration-300 line-clamp-1">
