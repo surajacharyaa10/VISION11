@@ -331,9 +331,9 @@ export async function getAllCompetitionsByCountry() {
       }
     }
   } catch (error) {
-    console.error(
+    console.warn(
       "football-data.org fetch failed; showing baseline data with flagcdn.com flags:",
-      error
+      error.message || error
     );
     isDemo = true;
   }
@@ -429,7 +429,7 @@ export async function getDomesticCompetitions() {
 
     return { data: mapped, isDemo: false };
   } catch (error) {
-    console.error("Failed to fetch domestic competitions from football-data.org, using fallback:", error);
+    console.warn("Failed to fetch domestic competitions from football-data.org, using fallback:", error.message || error);
     return { data: MOCK_LEAGUES, isDemo: true };
   }
 }
