@@ -6,7 +6,7 @@ export default async function TopLeagues() {
   const { data: leagues, isDemo } = await getDomesticCompetitions();
 
   return (
-    <div className="flex bg-zinc-50 min-h-screen -m-6 text-zinc-900">
+    <div className="flex bg-zinc-50 min-h-screen text-zinc-900">
       <TopLeaguesSidebarWrapper />
 
 
