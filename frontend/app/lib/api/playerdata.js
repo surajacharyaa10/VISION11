@@ -1,6 +1,6 @@
 "use server";
 
-const API_KEY = '981cdc47446c04457e289cc66747cf2b';
+const API_KEY = '8bc24bdb87946c78e98f2a3ee3e15cf1';
 const BASE_URL = 'https://v3.football.api-sports.io';
 
 const headers = {
@@ -90,7 +90,7 @@ export async function getPlayer(id) {
                 strWeight: p.weight,
                 age: p.age,
                 birth: p.birth,
-                careerHistory: [] // We'll fetch this separately via squads or transfers
+                careerHistory: []
             };
         }
         return null;
@@ -248,6 +248,12 @@ export async function resolvePlayerIdByName(name) {
             headers
         });
         const data = await response.json();
+
+        if (data.errors && Object.keys(data.errors).length > 0) {
+            const errorMsg = Object.values(data.errors)[0];
+            throw new Error(typeof errorMsg === 'string' ? errorMsg : "API Error");
+        }
+
         if (data.response && data.response.length > 0) {
             // Return the first matching player's ID
             return data.response[0].player.id;
@@ -255,6 +261,6 @@ export async function resolvePlayerIdByName(name) {
         return null;
     } catch (e) {
         console.error("Failed to resolve player ID by name:", e);
-        return null;
+        throw e;
     }
 }
