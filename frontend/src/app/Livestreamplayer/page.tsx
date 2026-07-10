@@ -1,4 +1,4 @@
-import { getAllMatches } from "../../api-football/client";
+import { getAllMatches } from "@/thesportsdb";
 import LiveStreamPlayer from "./LiveStreamPlayer";
 
 

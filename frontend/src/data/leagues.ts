@@ -1,87 +1,33 @@
 export const Leagues = [
-
-    {
-        id: 1,
-        name: "FIFA World Cup",
-        href: "world-cup",
-        imageQuery: "FIFA World Cup football"
-    },
-
-    {
-        id: 2,
-        name: "UEFA Champions League",
-        href: "champions-league",
-        imageQuery: "UEFA Champions League football"
-    },
-
-    {
-        id: 3,
-        name: "Premier League",
-        href: "premier-league",
-        imageQuery: "Premier League football"
-    },
-
-    {
-        id: 4,
-        name: "Primera Division",
-        href: "la-liga",
-        imageQuery: "La Liga football"
-    },
-
-    {
-        id: 5,
-        name: "Bundesliga",
-        href: "bundesliga",
-        imageQuery: "Bundesliga football"
-    },
-
-    {
-        id: 6,
-        name: "Eredivisie",
-        href: "eredivisie",
-        imageQuery: "Eredivisie football"
-    },
-
-    {
-        id: 7,
-        name: "Serie A",
-        href: "serie-a",
-        imageQuery: "Serie A football Italy"
-    },
-
-    {
-        id: 8,
-        name: "Ligue 1",
-        href: "ligue-1",
-        imageQuery: "Ligue 1 football France"
-    },
-
-    {
-        id: 9,
-        name: "Championship",
-        href: "championship",
-        imageQuery: "English Championship football"
-    },
-
-    {
-        id: 10,
-        name: "Primeira Liga",
-        href: "primeira-liga",
-        imageQuery: "Primeira Liga football Portugal"
-    },
-
-    {
-        id: 11,
-        name: "Campeonato Brasileiro Série A",
-        href: "brazilian-series-a",
-        imageQuery: "Brazilian football"
-    },
-
-    {
-        id: 12,
-        name: "European Championship",
-        href: "european-championship",
-        imageQuery: "European Championship football"
-    }
-
+    { id: 1, name: "Premier League", category: "league", href: "premier-league", imageQuery: "Premier League football", apiFootballId: 39, theSportsDBId: 4328, logo: "/img/leagues/premier_league.webp" },
+    { id: 2, name: "EFL Championship", category: "league", href: "championship", imageQuery: "English Championship football", apiFootballId: 40, theSportsDBId: 4329, logo: "/img/leagues/championship.webp" },
+    { id: 3, name: "La Liga", category: "league", href: "la-liga", imageQuery: "La Liga football", apiFootballId: 140, theSportsDBId: 4335, logo: "https://imgs.search.brave.com/L0yIcIPzdYBpS-EkwXhiQfmJ-_Z83x5YFkmcAP1uMQo/rs:fit:100:100:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5hcGktc3BvcnRz/LmlvL2Zvb3RiYWxs/L2xlYWd1ZXMvMTQw/LnBuZw" },
+    { id: 4, name: "Bundesliga", category: "league", href: "bundesliga", imageQuery: "Bundesliga football", apiFootballId: 78, theSportsDBId: 4331, logo: "/img/leagues/bundesliga.webp" },
+    { id: 5, name: "Serie A", category: "league", href: "serie-a", imageQuery: "Serie A football Italy", apiFootballId: 135, theSportsDBId: 4332, logo: "/img/leagues/serie_a.webp" },
+    { id: 6, name: "Ligue 1", category: "league", href: "ligue-1", imageQuery: "Ligue 1 football France", apiFootballId: 61, theSportsDBId: 4334, logo: "/img/leagues/ligue_1.webp" },
+    { id: 7, name: "Eredivisie", category: "league", href: "eredivisie", imageQuery: "Eredivisie football", apiFootballId: 88, theSportsDBId: 4337, logo: "https://media.api-sports.io/football/leagues/88.png" },
+    { id: 8, name: "Primeira Liga", category: "league", href: "primeira-liga", imageQuery: "Primeira Liga football Portugal", apiFootballId: 94, theSportsDBId: 4344, logo: "/img/leagues/liga_portugal.webp" },
+    { id: 9, name: "Campeonato Brasileiro Série A", category: "league", href: "brazilian-series-a", imageQuery: "Brazilian football", apiFootballId: 71, theSportsDBId: 4351, logo: "/img/leagues/brazilian_serie_a.webp" },
+    { id: 10, name: "UEFA Champions League", category: "international-club", href: "champions-league", imageQuery: "UEFA Champions League football", apiFootballId: 2, theSportsDBId: 4480, logo: "https://media.api-sports.io/football/leagues/2.png" },
+    { id: 11, name: "UEFA Europa League", category: "international-club", href: "europa-league", imageQuery: "UEFA Europa League football", apiFootballId: 3, theSportsDBId: 4481, logo: "https://media.api-sports.io/football/leagues/3.png" },
+    { id: 12, name: "FIFA World Cup", category: "international-country", href: "world-cup", imageQuery: "FIFA World Cup football", apiFootballId: 1, theSportsDBId: 4429, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/FIFA_World_Cup_wordmark_%282023%29.svg/500px-FIFA_World_Cup_wordmark_%282023%29.svg.png" },
+    { id: 13, name: "UEFA Euro", category: "international-country", href: "uefa-euro", imageQuery: "UEFA Euro football", apiFootballId: 4, theSportsDBId: 4502, logo: "https://media.api-sports.io/football/leagues/4.png" },
+    { id: 14, name: "Copa América", category: "international-country", href: "copa-america", imageQuery: "Copa America football", apiFootballId: 9, theSportsDBId: 4499, logo: "https://media.api-sports.io/football/leagues/9.png" },
+    { id: 15, name: "Africa Cup of Nations", category: "international-country", href: "africa-cup-of-nations", imageQuery: "Africa Cup of Nations football", apiFootballId: 6, theSportsDBId: 4496, logo: "https://media.api-sports.io/football/leagues/6.png" },
+    { id: 16, name: "CONCACAF Gold Cup", category: "international-country", href: "gold-cup", imageQuery: "CONCACAF Gold Cup football", apiFootballId: 8, theSportsDBId: 4873, logo: "https://media.api-sports.io/football/leagues/8.png" },
+    { id: 17, name: "International Friendlies", category: "friendly", href: "international-friendlies", imageQuery: "International friendly football", apiFootballId: 10, theSportsDBId: 4562, logo: "https://r2.thesportsdb.com/images/media/league/badge/pdnktx1648659448.png" },
+    { id: 18, name: "UEFA Nations League", category: "international-country", href: "nations-league", imageQuery: "UEFA Nations League football", apiFootballId: 5, theSportsDBId: 4490, logo: "https://media.api-sports.io/football/leagues/5.png" },
+    { id: 19, name: "Confederations Cup", category: "international-country", href: "confederations-cup", imageQuery: "Confederations Cup football", apiFootballId: 11, theSportsDBId: 4498, logo: "https://media.api-sports.io/football/leagues/11.png" },
+    { id: 20, name: "UEFA Super Cup", category: "international-club", href: "super-cup", imageQuery: "UEFA Super Cup football", apiFootballId: 7, theSportsDBId: 4512, logo: "https://media.api-sports.io/football/leagues/7.png" },
+    { id: 21, name: "FA Cup", category: "cup", href: "fa-cup", imageQuery: "FA Cup football", apiFootballId: 45, theSportsDBId: 4482, logo: "https://media.api-sports.io/football/leagues/45.png" },
+    { id: 22, name: "EFL Cup", category: "cup", href: "efl-cup", imageQuery: "EFL Cup Carabao Cup football", apiFootballId: 46, theSportsDBId: 4566, logo: "https://media.api-sports.io/football/leagues/46.png" },
+    { id: 23, name: "Copa del Rey", category: "cup", href: "copa-del-rey", imageQuery: "Copa del Rey football", apiFootballId: 143, theSportsDBId: 4483, logo: "https://media.api-sports.io/football/leagues/143.png" },
+    { id: 24, name: "DFB-Pokal", category: "cup", href: "dfb-pokal", imageQuery: "DFB-Pokal German Cup football", apiFootballId: 79, theSportsDBId: 4485, logo: "https://media.api-sports.io/football/leagues/79.png" },
+    { id: 25, name: "Coupe de France", category: "cup", href: "coupe-de-france", imageQuery: "Coupe de France football", apiFootballId: 62, theSportsDBId: 4484, logo: "https://media.api-sports.io/football/leagues/62.png" },
+    { id: 26, name: "Coppa Italia", category: "cup", href: "coppa-italia", imageQuery: "Coppa Italia football", apiFootballId: 137, theSportsDBId: 4506, logo: "https://media.api-sports.io/football/leagues/137.png" },
+    { id: 27, name: "AFC Asian Cup", category: "international-country", href: "asian-cup", imageQuery: "AFC Asian Cup football", apiFootballId: 17, theSportsDBId: 4719, logo: "https://media.api-sports.io/football/leagues/17.png" },
+    { id: 28, name: "Copa Libertadores", category: "international-club", href: "copa-libertadores", imageQuery: "Copa Libertadores football", apiFootballId: 13, theSportsDBId: 4501, logo: "/img/leagues/copa_libertadores.webp" },
+    { id: 29, name: "CAF Champions League", category: "international-club", href: "caf-champions-league", imageQuery: "CAF Champions League football", apiFootballId: 12, theSportsDBId: 4732, logo: "https://media.api-sports.io/football/leagues/12.png" },
+    { id: 30, name: "CONCACAF Champions Cup", category: "international-club", href: "concacaf-champions-cup", imageQuery: "CONCACAF Champions Cup football", apiFootballId: 14, theSportsDBId: 4874, logo: "https://media.api-sports.io/football/leagues/14.png" },
+    { id: 31, name: "FIFA Club World Cup", category: "international-club", href: "club-world-cup", imageQuery: "FIFA Club World Cup football", apiFootballId: 15, theSportsDBId: 4503, logo: "https://media.api-sports.io/football/leagues/15.png" }
 ];

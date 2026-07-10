@@ -19,8 +19,8 @@ import {
 export default async function Home() {
   const getData = await getMatchesFootball();
   const getDataFinished = await getMatchesFootballFinished();
-  const matchesData = getData?.matches;
-  const matchesDataFinished = getDataFinished?.matches;
+  const matchesData = getData?.matches?.slice(0, 5) ?? [];
+  const matchesDataFinished = getDataFinished?.matches?.slice(0, 5) ?? [];
 
   const nd = new Date();
   const dateConvert = nd.toLocaleDateString("en-US", {
@@ -209,6 +209,17 @@ export default async function Home() {
           matchesList={matchesData}
           matchesListFinished={matchesDataFinished}
         />
+      </div>
+
+      {/* View More Button */}
+      <div className="text-center">
+        <Link
+          href="/fixtures"
+          className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-black font-semibold px-6 py-3 rounded-xl transition-colors"
+        >
+          View More
+          <ChevronRight className="h-4 w-4" />
+        </Link>
       </div>
 
     </div>

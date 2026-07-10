@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "cachified": "^4.0.0",
     "express": "^5.2.1",
     "lucide-react": "^1.24.0",
     "next": "14.1.3",

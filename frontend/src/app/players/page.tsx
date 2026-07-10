@@ -1,5 +1,5 @@
-import { getTopScorers, getPlayerProfiles } from "@/api-football";
-import type { PlayerWithStatistics, PlayerProfile } from "@/api-football";
+import { getTopScorers, getPlayerProfiles } from "@/thesportsdb";
+import type { PlayerWithStatistics, PlayerProfile } from "@/thesportsdb";
 import PlayersClient, { type PlayerCard } from "./PlayersClient";
 
 export const dynamic = "force-dynamic";
