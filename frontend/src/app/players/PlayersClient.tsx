@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import PlayerImage from "./PlayerImage";
 
 export interface PlayerCard {
     id: number;
@@ -128,17 +129,17 @@ export default function PlayersClient({
           "
                     >
                         <div className="relative h-72 bg-slate-800">
-                            <Image
-                                src={player.image}
-                                alt={player.name}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 33vw"
+                            <PlayerImage
+                                photo={player.image}
+                                name={player.name}
+                                query={`${player.name} footballer`}
                                 className="
               object-cover
+              w-full
+              h-full
               group-hover:scale-110
               transition
               "
-                                unoptimized
                             />
 
                             <div
@@ -187,6 +188,7 @@ export default function PlayersClient({
                             </div>
 
                             <button
+                                onClick={() => router.push(`/players/${player.id}`)}
                                 className="
               mt-4
               w-full
@@ -242,16 +244,17 @@ export default function PlayersClient({
 
                         <div className="text-center">
                             <div className="relative w-[140px] h-[140px] mx-auto">
-                                <Image
-                                    src={selected.image}
-                                    fill
-                                    alt={selected.name}
+                                <PlayerImage
+                                    photo={selected.image}
+                                    name={selected.name}
+                                    query={`${selected.name} footballer`}
                                     className="
           rounded-full
           object-cover
           border-4 border-blue-500
+          w-full
+          h-full
           "
-                                    unoptimized
                                 />
                             </div>
 

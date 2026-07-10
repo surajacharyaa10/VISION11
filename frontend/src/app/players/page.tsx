@@ -1,4 +1,4 @@
-import { getTopScorers, getPlayerProfiles } from "@/thesportsdb";
+import { getPlayerProfiles, getFeaturedPlayers } from "@/thesportsdb";
 import type { PlayerWithStatistics, PlayerProfile } from "@/thesportsdb";
 import PlayersClient, { type PlayerCard } from "./PlayersClient";
 
@@ -60,15 +60,15 @@ function mapProfileToCard(profile: PlayerProfile): PlayerCard {
         id: profile.id,
         name: profile.name,
         image: profile.photo,
-        club: "—",
+        club: profile.club && profile.club !== "Free Agent" ? profile.club : "—",
         country: profile.nationality ?? "Unknown",
-        position: "Unknown",
+        position: profile.position && profile.position !== "Unknown" ? profile.position : "—",
         age: profile.age ?? 0,
-        rating: 0,
-        goals: 0,
-        assists: 0,
-        matches: 0,
-        bio: `${profile.name} is from ${profile.nationality ?? "an unknown country"
+        rating: profile.rating ?? 0,
+        goals: profile.goals ?? 0,
+        assists: profile.assists ?? 0,
+        matches: profile.matches ?? 0,
+        bio: profile.bio || `${profile.name} is from ${profile.nationality ?? "an unknown country"
             }. Born ${profile.birth?.date ?? "n/a"} in ${profile.birth?.place ?? "n/a"
             }.`,
     };
@@ -91,12 +91,9 @@ export default async function PlayerPage({ searchParams }: PageProps) {
             );
             players = (res.response ?? []).map(mapProfileToCard);
         } else {
-            // Default browsing experience: top scorers of a given league/season.
-            const res = await getTopScorers(
-                { league, season },
-                { next: { revalidate: 3600 } }
-            );
-            players = (res.response ?? []).map(mapTopScorerToCard);
+            // Default browsing experience: a curated list of world-class players.
+            const res = await getFeaturedPlayers({ next: { revalidate: 3600 } });
+            players = res.map(mapProfileToCard);
         }
     } catch (error) {
         console.error("Failed to load players from API-Football:", error);
