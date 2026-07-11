@@ -9,6 +9,8 @@ async function getPopularTeams(): Promise<TheSportsDBTeam[]> {
     try {
         const res = await theSportsDBGetV1<any>("search_all_teams.php", {
             l: "English Premier League",
+        }, {
+            next: { revalidate: 60 }
         });
         const data = res.response;
         return Array.isArray(data) ? data : [];

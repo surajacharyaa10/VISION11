@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: "Standings", href: "/standings" },
   { label: "Teams", href: "/teams" },
   { label: "Players", href: "/players" },
-  { label: "Livestreamplayer", href: "/Livestreamplayer" },
+  { label: "Live Football", href: "/Livestreamplayer" },
   { label: "AI Analysis", href: "/AiAnalysis" },
 ];
 
