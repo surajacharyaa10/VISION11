@@ -193,3 +193,392 @@ export async function getFootballdataStandings(leagueId: number, seasonId?: numb
   const rows = standingsData?.standings ?? [];
   return rows.map(mapFootballdataRow);
 }
+
+export interface FootballdataMatch {
+  match_id: number;
+  match_date: string;
+  date_unix: number;
+  status: string;
+  status_localized: string;
+  league: { league_id: number; name: string; country: string };
+  season: { season_id: number; year: number | string };
+  home_team: { team_id: number; team_name: string; team_logo?: string };
+  away_team: { team_id: number; team_name: string; team_logo?: string };
+  score: {
+    home: number;
+    away: number;
+    total_goals: number;
+    halftime: { home: number; away: number; total_goals: number };
+    second_half: { home: number; away: number; total_goals: number };
+  };
+  xg?: { home: number; away: number; total: number };
+  odds?: { match_winner: { home: number; draw: number; away: number } };
+  probabilities?: {
+    home_win: number;
+    draw: number;
+    away_win: number;
+    over_2_5_goals: number;
+    both_teams_to_score: number;
+  };
+  venue?: { stadium_name?: string; stadium_location?: string };
+  winner_text?: string;
+}
+
+export interface FootballdataMatchesResponse {
+  success: boolean;
+  data: {
+    team: {
+      team_id: number;
+      team_name: string;
+      team_name_english: string;
+      team_logo: string;
+      country: string;
+    };
+    matches: FootballdataMatch[];
+  };
+}
+
+export async function getFootballdataTeamMatches(teamId: number | string): Promise<FootballdataMatchesResponse | null> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/matches`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Team matches request failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+
+    return (await res.json()) as FootballdataMatchesResponse;
+  } catch {
+    return null;
+  }
+}
+
+export interface FootballdataPlayer {
+  player_id: number;
+  player_name: string;
+  first_name: string;
+  last_name: string;
+  known_name: string;
+  nationality: string;
+  date_of_birth: string | null;
+  age: number | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  position: string;
+  player_image?: string;
+  season?: { season_id: number; year: number | string };
+  league?: { league_id: number; name: string };
+  stats?: {
+    appearances: number | null;
+    minutes: number | null;
+    goals: number | null;
+    assists: number | null;
+    clean_sheets: number | null;
+    goals_conceded: number | null;
+    cards: number | null;
+    yellow_cards: number | null;
+    red_cards: number | null;
+    goals_per_90: number;
+    assists_per_90: number;
+    cards_per_90: number;
+  };
+}
+
+export interface FootballdataPlayersResponse {
+  success: boolean;
+  data: {
+    team: {
+      team_id: number;
+      team_name: string;
+      team_logo: string;
+      country: string;
+    };
+    players: FootballdataPlayer[];
+  };
+}
+
+export interface FootballdataTeamStatsResponse {
+  success: boolean;
+  data: {
+    team: {
+      team_id: number;
+      team_name: string;
+      team_name_clean: string;
+      seo_slug: string;
+      full_name: string;
+      country: string;
+      team_logo: string;
+    };
+    league?: {
+      league_id: number;
+      name: string;
+      country: string;
+      competition_name: string;
+      image: string;
+    };
+    season?: {
+      season_id: number;
+      year: number | string;
+      is_current: boolean;
+    };
+    summary?: {
+      matches_played: number;
+      wins: number;
+      draws: number;
+      losses: number;
+      goals_for: number;
+      goals_against: number;
+      goal_difference: number;
+      win_percentage: number;
+      draw_percentage: number;
+      loss_percentage: number;
+      points_per_game: number;
+    };
+    home_away?: {
+      home: {
+        matches_played: number;
+        wins: number;
+        draws: number;
+        losses: number;
+        goals_for: number | null;
+        goals_against: number | null;
+        points_per_game: number;
+      };
+      away: {
+        matches_played: number;
+        wins: number;
+        draws: number;
+        losses: number;
+        goals_for: number | null;
+        goals_against: number | null;
+        points_per_game: number;
+      };
+    };
+    goals?: {
+      for_per_match: number;
+      against_per_match: number;
+      total_goals_per_match: number;
+      over_0_5_percentage: number;
+      over_1_5_percentage: number;
+      over_2_5_percentage: number;
+      over_3_5_percentage: number;
+      over_4_5_percentage: number;
+      over_5_5_percentage: number;
+      under_0_5_percentage: number;
+      under_1_5_percentage: number;
+      under_2_5_percentage: number;
+      under_3_5_percentage: number;
+      under_4_5_percentage: number;
+      under_5_5_percentage: number;
+    };
+    clean_sheets?: {
+      total: number;
+      home: number;
+      away: number;
+      percentage: number;
+      home_percentage: number;
+      away_percentage: number;
+    };
+    failed_to_score?: {
+      total: number;
+      home: number;
+      away: number;
+      percentage: number;
+      home_percentage: number;
+      away_percentage: number;
+    };
+    both_teams_to_score?: {
+      total: number;
+      home: number;
+      away: number;
+      percentage: number;
+      home_percentage: number;
+      away_percentage: number;
+    };
+    corners?: {
+      recorded_matches: number;
+      for_total: number;
+      against_total: number;
+      for_per_match: number;
+      against_per_match: number;
+      total_per_match: number;
+      over_7_5_percentage: number;
+      over_8_5_percentage: number;
+      over_9_5_percentage: number;
+      over_10_5_percentage: number;
+      over_11_5_percentage: number;
+    };
+    cards?: {
+      for_total: number;
+      against_total: number;
+      total: number;
+      for_per_match: number;
+      against_per_match: number;
+      total_per_match: number;
+      over_1_5_percentage: number;
+      over_2_5_percentage: number;
+      over_3_5_percentage: number;
+      over_4_5_percentage: number;
+    };
+    shots?: {
+      recorded_matches: number;
+      shots_total: number;
+      shots_per_match: number;
+      shots_on_target_total: number;
+      shots_on_target_per_match: number;
+      shot_conversion_rate: number;
+    };
+    xg?: {
+      xg_for: number;
+      xg_against: number;
+      xg_for_per_match: number;
+      xg_against_per_match: number;
+    };
+    possession?: {
+      average: number;
+      home_average: number;
+      away_average: number;
+    };
+    fouls?: {
+      committed_total: number;
+      committed_per_match: number;
+      against_total: number;
+      against_per_match: number;
+    };
+    goal_timing?: {
+      scored: Record<string, number>;
+      conceded: Record<string, number>;
+    };
+    form?: {
+      overall: string;
+      home: string;
+      away: string;
+    };
+    set_pieces?: {
+      throw_ins: Record<string, number>;
+      free_kicks: Record<string, number>;
+      goal_kicks: Record<string, number>;
+    };
+    offsides?: {
+      team_per_match: number;
+      match_total_per_match: number;
+      over_2_5_percentage: number;
+      over_3_5_percentage: number;
+      over_4_5_percentage: number;
+    };
+    goal_timing_minutes?: {
+      scored: Record<string, number>;
+      conceded: Record<string, number>;
+    };
+    correct_score?: {
+      match_total_goals: Record<string, number>;
+      team_goals: Record<string, number>;
+    };
+    special_markets?: Record<string, number>;
+    penalties?: {
+      won: number;
+      scored: number;
+      missed: number;
+      conceded: number;
+      won_per_match: number;
+      match_with_penalty_percentage: number;
+    };
+    last_updated?: string;
+  };
+}
+
+export interface FootballdataTeamDetailsResponse {
+  success: boolean;
+  data: {
+    team_id: number;
+    team_name: string;
+    team_name_clean: string;
+    seo_slug: string;
+    full_name: string;
+    country: string;
+    continent: string | null;
+    team_logo: string;
+    stadium: { name: string; address: string };
+    founded: string;
+    form: { ppg_home: number; ppg_away: number; ppg_overall: number };
+    league_seasons: any[];
+    recent_matches: any[];
+    upcoming_matches: any[];
+  };
+}
+
+export async function getFootballdataTeam(teamId: number | string): Promise<FootballdataTeamDetailsResponse | null> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Team details request failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+
+    return (await res.json()) as FootballdataTeamDetailsResponse;
+  } catch {
+    return null;
+  }
+}
+
+export async function getFootballdataTeamStats(teamId: number | string): Promise<FootballdataTeamStatsResponse | null> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/stats`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Team stats request failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+
+    const json = (await res.json()) as any;
+    return json?.data ?? json;
+  } catch {
+    return null;
+  }
+}
+
+export async function getFootballdataTeamPlayers(teamId: number | string): Promise<FootballdataPlayer[]> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/players`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Team players request failed: ${res.status} ${res.statusText}`);
+      return [];
+    }
+
+    const json = (await res.json()) as FootballdataPlayersResponse;
+    return Array.isArray(json?.data?.players) ? json.data.players : [];
+  } catch {
+    return [];
+  }
+}
+

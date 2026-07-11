@@ -27,6 +27,14 @@ export function searchTeams(params?: SearchTeamsParams): Promise<TheSportsDBResp
   return theSportsDBGetV1<TheSportsDBTeam[]>("searchteams.php", params);
 }
 
+export interface SearchPlayersParams extends QueryParams {
+  t?: string;
+}
+
+export function searchPlayers(params?: SearchPlayersParams): Promise<TheSportsDBResponse<any[]>> {
+  return theSportsDBGetV1<any[]>("searchplayers.php", params);
+}
+
 export interface GetTeamPreviousEventsParams extends QueryParams {
   id?: number | string;
 }

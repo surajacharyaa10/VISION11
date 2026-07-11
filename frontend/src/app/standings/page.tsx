@@ -59,32 +59,6 @@ function TeamRow({ team, index }: { team: any; index: number }) {
     );
 }
 
-function StandingsTable({ teams }: { teams: any[] }) {
-    return (
-        <div className="bg-[#0d1117] rounded-xl overflow-hidden border border-white/5">
-            <div className="grid grid-cols-12 gap-2 pl-5 pr-4 md:pr-6 py-3 text-gray-400 text-[11px] border-b border-white/10 uppercase tracking-wider">
-                <span className="col-span-1"></span>
-                <span className="col-span-3">Team</span>
-                <span className="col-span-1 text-center">MP</span>
-                <span className="col-span-1 text-center">W-D-L</span>
-                <span className="col-span-1 text-center">DIFF</span>
-                <span className="col-span-1 text-center">GLS</span>
-                <span className="col-span-3 text-center">Form</span>
-                <span className="col-span-1 text-center">PTS</span>
-            </div>
-
-            {teams.map((team, idx) => (
-                <Link key={team.team?.id ?? idx} href={`/teams/${team.team?.id}`} className="contents">
-                    <TeamRow
-                        team={team}
-                        index={idx}
-                    />
-                </Link>
-            ))}
-        </div>
-    );
-}
-
 export default async function StandingPage({ searchParams }: PageProps) {
     const domesticLeagues = Leagues.filter((l) => l.category === "league");
     const defaultId = domesticLeagues[0]?.theSportsDBId ?? 4328;
@@ -177,7 +151,7 @@ export default async function StandingPage({ searchParams }: PageProps) {
                 {!error && groupEntries.length > 0 && (
                     <div>
                         {groupEntries.map(([group, teams]) => (
-                            <GroupStage key={group} teams={teams} groupName={group} />
+                            <GroupStage key={group} teams={teams} groupName={group} leagueId={leagueId} />
                         ))}
                     </div>
                 )}

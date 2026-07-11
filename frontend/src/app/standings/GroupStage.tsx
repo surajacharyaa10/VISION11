@@ -32,6 +32,7 @@ interface StandingTeam {
 interface GroupStageProps {
     teams: StandingTeam[];
     groupName: string;
+    leagueId?: number;
 }
 
 function FormBadge({ result }: { result: string }) {
@@ -71,7 +72,7 @@ const getQualificationColor = (qual: string | undefined) => {
     }
 };
 
-export default function GroupStage({ teams, groupName }: GroupStageProps) {
+export default function GroupStage({ teams, groupName, leagueId }: GroupStageProps) {
     const sortedTeams = [...teams].sort((a, b) => {
         const pointsA = a.points ?? 0;
         const pointsB = b.points ?? 0;
@@ -115,7 +116,7 @@ export default function GroupStage({ teams, groupName }: GroupStageProps) {
                     const indicatorColor = getQualificationColor(qualification);
 
                     return (
-                        <Link href={`/teams/${team.team?.id}`} className="contents">
+                        <Link href={`/standings/team/${team.team?.id}?league=${leagueId}`} className="contents">
                             <div
                                 key={team.team?.id ?? index}
                                 className="grid grid-cols-12 gap-2 items-center px-3 py-2.5 border-b border-white/5 hover:bg-white/5 transition text-sm relative"
