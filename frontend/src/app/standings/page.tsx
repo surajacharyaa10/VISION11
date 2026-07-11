@@ -1,361 +1,224 @@
-export default function Standing() {
+import { getStandings, isLikelyTruncated } from "@/thesportsdb";
+import { getFootballdataSeasons } from "@/thesportsdb/footballdata";
+import { Leagues } from "@/data/leagues";
+import TeamLogo from "./TeamLogo";
+import LeagueSelect from "./LeagueSelect";
+import GroupStage from "./GroupStage";
+import SeasonSelect from "./SeasonSelect";
+export const dynamic = "force-dynamic";
 
-    const teams = [
-        {
-            pos: 1,
-            team: "Manchester City",
-            played: 24,
-            win: 19,
-            draw: 3,
-            loss: 2,
-            gd: "+42",
-            points: 60,
-            form: ["W", "W", "W", "D", "W"]
-        },
-        {
-            pos: 2,
-            team: "Arsenal",
-            played: 24,
-            win: 17,
-            draw: 5,
-            loss: 2,
-            gd: "+35",
-            points: 56,
-            form: ["W", "W", "D", "W", "W"]
-        },
-        {
-            pos: 3,
-            team: "Liverpool",
-            played: 24,
-            win: 16,
-            draw: 4,
-            loss: 4,
-            gd: "+28",
-            points: 52,
-            form: ["W", "L", "W", "W", "D"]
-        },
-        {
-            pos: 4,
-            team: "Chelsea",
-            played: 24,
-            win: 14,
-            draw: 4,
-            loss: 6,
-            gd: "+18",
-            points: 46,
-            form: ["W", "D", "W", "L", "W"]
-        }
-    ];
+interface PageProps {
+    searchParams?: { league?: string; season?: string };
+}
 
+function FormBadge({ result }: { result: string }) {
+    const colorClass =
+        result === "W"
+            ? "bg-green-500"
+            : result === "D"
+                ? "bg-gray-500"
+                : "bg-red-500";
+    return (
+        <span className={`inline-flex w-5 h-5 rounded-sm text-[10px] font-bold text-white items-center justify-center ${colorClass}`}>
+            {result}
+        </span>
+    );
+}
+
+
+function TeamRow({ team, index }: { team: any; index: number }) {
+    const form: string[] = team.form ? String(team.form).split("") : [];
+    const gd = team.goalsDiff ?? 0;
+    const goalsFor = team.all?.goals?.for ?? 0;
 
     return (
+        <div className="grid grid-cols-12 gap-2 items-center pl-5 pr-4 md:pr-6 py-2.5 border-b border-white/5 hover:bg-white/5 transition text-sm">
+            <div className="col-span-1 font-bold text-gray-300">
+                {team.rank ?? index + 1}
+            </div>
+            <div className="col-span-3 flex items-center gap-3 min-w-0">
+                <TeamLogo src={team.team?.logo} name={team.team?.name ?? "?"} />
+                <span className="font-medium truncate">{team.team?.name}</span>
+            </div>
+            <div className="col-span-1 text-center text-gray-300">{team.all?.played ?? 0}</div>
+            <div className="col-span-1 text-center text-gray-300">
+                {team.all?.win ?? 0}-{team.all?.draw ?? 0}-{team.all?.lose ?? 0}
+            </div>
+            <div className="col-span-1 text-center font-medium text-gray-200">
+                {gd > 0 ? `+${gd}` : gd}
+            </div>
+            <div className="col-span-1 text-center font-medium text-gray-200">{goalsFor}</div>
+            <div className="col-span-3 flex gap-1 justify-center items-center">
+                {form.length > 0
+                    ? form.map((f, i) => <FormBadge key={i} result={f} />)
+                    : <span className="text-gray-500 text-xs">-</span>}
+            </div>
+            <div className="col-span-1 text-center font-bold text-white">{team.points ?? 0}</div>
+        </div>
+    );
+}
 
-        <main className="
-            min-h-screen
-            bg-[#070b14]
-            text-white
-            p-6
-        ">
-
-
-            {/* Header */}
-
-            <div className="
-                flex
-                flex-col
-                md:flex-row
-                justify-between
-                gap-5
-                mb-8
-            ">
-
-                <div>
-
-                    <h1 className="
-                        text-4xl
-                        font-black
-                    ">
-                        League Standings 🏆
-                    </h1>
-
-                    <p className="
-                        text-gray-400
-                        mt-2
-                    ">
-                        Live football rankings powered by Vision11 AI
-                    </p>
-
-                </div>
-
-
-
-                <select className="
-                    bg-[#151b2b]
-                    px-5
-                    py-3
-                    rounded-xl
-                    outline-none
-                ">
-
-                    <option>
-                        Premier League
-                    </option>
-
-                    <option>
-                        La Liga
-                    </option>
-
-                    <option>
-                        Champions League
-                    </option>
-
-                    <option>
-                        Serie A
-                    </option>
-
-                </select>
-
-
+function StandingsTable({ teams }: { teams: any[] }) {
+    return (
+        <div className="bg-[#0d1117] rounded-xl overflow-hidden border border-white/5">
+            <div className="grid grid-cols-12 gap-2 pl-5 pr-4 md:pr-6 py-3 text-gray-400 text-[11px] border-b border-white/10 uppercase tracking-wider">
+                <span className="col-span-1"></span>
+                <span className="col-span-3">Team</span>
+                <span className="col-span-1 text-center">MP</span>
+                <span className="col-span-1 text-center">W-D-L</span>
+                <span className="col-span-1 text-center">DIFF</span>
+                <span className="col-span-1 text-center">GLS</span>
+                <span className="col-span-3 text-center">Form</span>
+                <span className="col-span-1 text-center">PTS</span>
             </div>
 
-
-
-
-
-            {/* Table */}
-
-            <div className="
-                bg-[#111827]
-                rounded-3xl
-                overflow-hidden
-                border
-                border-white/5
-            ">
-
-
-                {/* Desktop Header */}
-
-                <div className="
-                    hidden
-                    md:grid
-                    grid-cols-12
-                    px-6
-                    py-4
-                    text-gray-400
-                    text-sm
-                    border-b
-                    border-white/10
-                ">
-
-                    <span className="col-span-1">
-                        #
-                    </span>
-
-                    <span className="col-span-4">
-                        Club
-                    </span>
-
-                    <span>
-                        MP
-                    </span>
-
-                    <span>
-                        W
-                    </span>
-
-                    <span>
-                        D
-                    </span>
-
-                    <span>
-                        L
-                    </span>
-
-                    <span>
-                        GD
-                    </span>
-
-                    <span>
-                        PTS
-                    </span>
-
-                    <span className="col-span-2">
-                        Form
-                    </span>
-
-
-                </div>
-
-
-
-
-
-                {
-                    teams.map((team, index) => (
-
-                        <div
-                            key={index}
-                            className="
-                            grid
-                            grid-cols-1
-                            md:grid-cols-12
-                            gap-4
-                            items-center
-                            px-6
-                            py-5
-                            border-b
-                            border-white/5
-                            hover:bg-white/5
-                            transition
-                        "
-                        >
-
-
-                            {/* Position */}
-
-                            <div className="
-                                font-bold
-                                text-green-400
-                            ">
-                                {team.pos}
-                            </div>
-
-
-
-                            {/* Club */}
-
-                            <div className="
-                                md:col-span-4
-                                flex
-                                items-center
-                                gap-3
-                            ">
-
-                                <div className="
-                                    w-12
-                                    h-12
-                                    rounded-full
-                                    bg-blue-600
-                                    flex
-                                    items-center
-                                    justify-center
-                                    font-bold
-                                ">
-                                    {team.team[0]}
-                                </div>
-
-
-                                <div>
-
-                                    <h3 className="font-bold">
-                                        {team.team}
-                                    </h3>
-
-                                    <p className="
-                                    text-xs
-                                    text-gray-400
-                                    ">
-                                        AI Rating 8.7
-                                    </p>
-
-                                </div>
-
-
-                            </div>
-
-
-
-
-                            <span>
-                                {team.played}
-                            </span>
-
-                            <span className="text-green-400">
-                                {team.win}
-                            </span>
-
-                            <span>
-                                {team.draw}
-                            </span>
-
-                            <span className="text-red-400">
-                                {team.loss}
-                            </span>
-
-
-                            <span>
-                                {team.gd}
-                            </span>
-
-
-
-                            <span className="
-                                text-xl
-                                font-black
-                            ">
-                                {team.points}
-                            </span>
-
-
-
-
-
-                            {/* Form */}
-
-                            <div className="
-                                flex
-                                gap-2
-                                col-span-2
-                            ">
-
-                                {
-                                    team.form.map((f, i) => (
-
-                                        <span
-                                            key={i}
-                                            className={`
-                                            w-7
-                                            h-7
-                                            rounded-full
-                                            flex
-                                            items-center
-                                            justify-center
-                                            text-xs
-                                            font-bold
-                                            ${f === "W"
-                                                    ?
-                                                    "bg-green-500/20 text-green-400"
-                                                    :
-                                                    f === "D"
-                                                        ?
-                                                        "bg-yellow-500/20 text-yellow-400"
-                                                        :
-                                                        "bg-red-500/20 text-red-400"
-                                                }
-                                        `}
-                                        >
-                                            {f}
-                                        </span>
-
-                                    ))
-                                }
-
-                            </div>
-
-
-
-                        </div>
-
-                    ))
+            {teams.map((team, idx) => (
+                <TeamRow
+                    key={team.team?.id ?? idx}
+                    team={team}
+                    index={idx}
+                />
+            ))}
+        </div>
+    );
+}
+
+export default async function StandingPage({ searchParams }: PageProps) {
+    const domesticLeagues = Leagues.filter((l) => l.category === "league");
+    const defaultId = domesticLeagues[0]?.theSportsDBId ?? 4328;
+    const leagueId = Number(searchParams?.league) || defaultId;
+    const league = Leagues.find((l) => l.theSportsDBId === leagueId);
+
+    let initialSeason: string | undefined;
+    let seasons: any[] = [];
+
+    if (league?.footballDataId) {
+        try {
+            const fdSeasons = await getFootballdataSeasons(league.theSportsDBId);
+            seasons = fdSeasons;
+            if (fdSeasons.length) {
+                const current = searchParams?.season ? Number(searchParams.season) : undefined;
+                if (current && fdSeasons.some((s) => s.season_id === current)) {
+                    initialSeason = String(current);
+                } else if (fdSeasons[0]) {
+                    initialSeason = String(fdSeasons[0].season_id);
                 }
+            }
+        } catch {
+            initialSeason = searchParams?.season;
+        }
+    }
 
+    const selectedSeason = initialSeason ?? searchParams?.season ?? undefined;
 
+    let standings: any[] = [];
+    let error: string | null = null;
+    let truncated = false;
 
+    try {
+        const res = await getStandings({
+            league: leagueId,
+            season: selectedSeason ? Number(selectedSeason) : undefined,
+        });
+        standings = res.response?.[0]?.league?.standings?.[0] ?? [];
+        truncated = isLikelyTruncated((res as any).response?.[0], 20);
+    } catch (e) {
+        error =
+            e instanceof Error
+                ? e.message
+                : "Failed to load standings. Please try again later.";
+    }
+
+    const groups = new Map<string, any[]>();
+    const leagueDisplayName = league?.name ?? "League";
+    for (const t of standings) {
+        let g = t.group && t.group.trim() ? t.group : "League";
+        if (g === "League") g = leagueDisplayName;
+        if (!groups.has(g)) groups.set(g, []);
+        groups.get(g)!.push(t);
+    }
+    const groupEntries = Array.from(groups.entries());
+    const hasMultipleGroups = groupEntries.length > 1;
+
+    return (
+        <main className="min-h-screen bg-[#070b14] text-white">
+            <div className="border-b border-white/10">
+                <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black mb-1">
+                            {league?.name ?? "League"} Standings
+                        </h1>
+                        <p className="text-gray-400 text-sm">
+                            Live rankings powered by Vision11 AI
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <LeagueSelect current={leagueId} leagues={domesticLeagues} />
+                        {seasons.length > 0 && <SeasonSelect seasons={seasons} />}
+                    </div>
+                </div>
             </div>
 
+            <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+                {error && (
+                    <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-red-300">
+                        {error}
+                    </div>
+                )}
 
+                {!error && standings.length === 0 && (
+                    <div className="rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-gray-300">
+                        No standings found for this competition.
+                    </div>
+                )}
 
+                {!error && groupEntries.length > 0 && (
+                    <div>
+                        {groupEntries.map(([group, teams]) => (
+                            <GroupStage key={group} teams={teams} groupName={group} />
+                        ))}
+                    </div>
+                )}
+
+                {!error && standings.length > 0 && (
+                    <div className="mt-8 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+                        <details className="group">
+                            <summary className="px-5 py-4 border-b border-white/10 cursor-pointer text-sm font-bold text-white hover:bg-white/5 transition flex items-center justify-between list-none">
+                                <span>Rules and Legend</span>
+                                <svg className="w-5 h-5 text-gray-400 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div className="px-5 py-4 text-sm text-gray-300 space-y-2">
+                                <p>In the event that two (or more) teams have an equal number of points, the following rules break the tie:</p>
+                                <ol className="list-decimal list-inside space-y-1 ml-2">
+                                    <li>Head-to-head if all tied teams have paired matches</li>
+                                    <li>Goal difference</li>
+                                    <li>Goals scored</li>
+                                </ol>
+                            </div>
+                            <div className="px-5 py-4 border-t border-white/10">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                    {[
+                                        ["P", "Matches played"],
+                                        ["W", "Wins"],
+                                        ["D", "Draws"],
+                                        ["L", "Losses"],
+                                        ["DIFF", "Difference"],
+                                        ["GLS", "Goals"],
+                                        ["PTS", "Points"],
+                                    ].map(([abbr, full]) => (
+                                        <div key={abbr} className="flex items-start gap-2">
+                                            <span className="text-xs font-bold text-gray-400 w-8">{abbr}</span>
+                                            <span className="text-xs text-gray-300">{full}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                )}
+            </div>
         </main>
-
     );
 }

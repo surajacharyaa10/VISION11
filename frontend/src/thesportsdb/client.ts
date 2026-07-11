@@ -3,12 +3,48 @@ import type { QueryParams, TheSportsDBResponse, TheSportsDBEvent, LiveMatch, Str
 const V1_BASE = "https://www.thesportsdb.com/api/v1/json";
 const V2_BASE = "https://www.thesportsdb.com/api/v2/json";
 
-const FREE_KEYS = [
+const TEST_KEYS = new Set(["123", "1"]);
+
+const CONFIGURED_KEYS = [
   process.env.THESPORTSDB_API_KEY,
   process.env.NEXT_PUBLIC_THESPORTSDB_API_KEY,
-  "123",
-  "1",
 ].filter((k): k is string => Boolean(k));
+
+const HAS_REAL_KEY = CONFIGURED_KEYS.some((k) => !TEST_KEYS.has(k));
+
+const FREE_KEYS = [...CONFIGURED_KEYS, "123", "1"].filter(
+  (k, i, arr): k is string => Boolean(k) && arr.indexOf(k) === i
+);
+
+/**
+ * TheSportsDB's free/test keys ("123", "1") silently truncate many
+ * endpoints (e.g. lookuptable.php caps at 5 rows vs 100 on a premium key).
+ * If we configured a real key but end up falling back to a test key,
+ * warn loudly instead of quietly returning a truncated table.
+ */
+function warnIfUsingTestKeyFallback(usedKey: string, endpoint: string) {
+  if (HAS_REAL_KEY && TEST_KEYS.has(usedKey)) {
+    console.warn(
+      `[TheSportsDB] Falling back to limited test key "${usedKey}" for "${endpoint}". ` +
+      `Your configured THESPORTSDB_API_KEY failed (bad/expired key?) — results may be truncated ` +
+      `(e.g. lookuptable.php is capped at 5 rows on test keys vs 100 on a premium key).`
+    );
+  }
+}
+
+/**
+ * TheSportsDB caps lookuptable responses to 5 rows on free/test API keys.
+ * We expose this cap so callers can detect a likely truncation.
+ */
+const LOOKUPTABLE_FREE_KEY_CAP = 5;
+
+export function isLikelyTruncated(response: any, expectedTotal: number): boolean {
+  const rows = Array.isArray(response?.table) ? response.table.length : 0;
+  if (expectedTotal > LOOKUPTABLE_FREE_KEY_CAP && rows <= LOOKUPTABLE_FREE_KEY_CAP) {
+    return true;
+  }
+  return false;
+}
 
 export interface RequestOptions {
   next?: {
@@ -62,6 +98,8 @@ async function v1Raw<T>(endpoint: string, params?: QueryParams, options?: Reques
       const json = await res.json().catch(() => ({}));
 
       if (res.ok) {
+        warnIfUsingTestKeyFallback(key, endpoint);
+
         let arrayResult: any[] = [];
         let objectResult: Record<string, any> = {};
 
@@ -343,4 +381,3 @@ export const apiFootballMedia = {
   playerPhoto: (playerId: number | string) =>
     `https://media.api-sports.io/football/players/${playerId}.png`,
 };
-

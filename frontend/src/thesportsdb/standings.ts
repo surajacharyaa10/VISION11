@@ -1,5 +1,6 @@
 import { theSportsDBGetV1 } from "./client";
-import type { ApiFootballResponse, QueryParams } from "./types";
+import type { TheSportsDBResponse, QueryParams } from "./types";
+import { getFootballdataStandings, hasFootballDataId } from "./footballdata";
 
 export interface StandingRecord {
   rank: number;
@@ -30,8 +31,50 @@ export interface StandingsResponseItem {
 
 export interface GetStandingsParams extends QueryParams {
   league?: number;
-  season: number;
+  season?: number | string;
   team?: number;
+}
+
+/** Extract the standings rows from a lookuptable response. */
+function tableFromResponse(res: any): any[] {
+  const r = res?.response;
+  if (Array.isArray(r)) return r;
+  if (r && Array.isArray(r.table)) return r.table;
+  if (Array.isArray(res?.table)) return res.table;
+  return [];
+}
+
+/**
+ * Some continental club competitions (UCL, UECL, etc.) return rows in
+ * lookuptable.php that aren't part of the actual group/league-phase points
+ * table — e.g. rows explicitly labelled as a domestic/qualifying stage, or
+ * placeholder rows with no games played and no points at all. Those don't
+ * belong in a "points table" and get filtered out here.
+ */
+function isDomesticOrPlaceholderRow(row: any): boolean {
+  const label = `${row.strDescription ?? ""} ${row.strGroup ?? ""}`.toLowerCase();
+  if (label.includes("domestic") || label.includes("qualif")) return true;
+
+  const played = Number(row.intPlayed) || 0;
+  const points = Number(row.intPoints) || 0;
+  const goalsFor = Number(row.intGoalsFor) || 0;
+  const goalsAgainst = Number(row.intGoalsAgainst) || 0;
+  const isCompletelyEmpty =
+    played === 0 && points === 0 && goalsFor === 0 && goalsAgainst === 0;
+
+  return isCompletelyEmpty;
+}
+
+/**
+ * Removes domestic/placeholder rows, but only when the response is a mix
+ * of real and placeholder rows. If every row is "empty" (e.g. the whole
+ * competition genuinely hasn't kicked off yet), we leave the table as-is
+ * rather than wiping it out entirely.
+ */
+function filterToGroupStageRows(rows: any[]): any[] {
+  const withRealData = rows.filter((r) => !isDomesticOrPlaceholderRow(r));
+  if (withRealData.length === 0) return rows;
+  return withRealData;
 }
 
 function mapTSDBRowToStanding(row: any): StandingRecord {
@@ -67,9 +110,9 @@ function mapTSDBRowToStanding(row: any): StandingRecord {
 export async function getStandings(
   params: GetStandingsParams,
   options?: QueryParams
-): Promise<ApiFootballResponse<StandingsResponseItem[]>> {
+): Promise<TheSportsDBResponse<StandingsResponseItem[]>> {
   const leagueId = String(params.league ?? 0);
-  const season = params.season ? String(params.season) : undefined;
+  const numericLeagueId = Number(leagueId);
 
   if (!leagueId || leagueId === "0") {
     return {
@@ -79,16 +122,34 @@ export async function getStandings(
       results: 0,
       paging: { current: 1, total: 1 },
       response: [],
-    } as ApiFootballResponse<StandingsResponseItem[]>;
+    } as TheSportsDBResponse<StandingsResponseItem[]>;
   }
 
-  const query: Record<string, string> = { l: leagueId };
-  if (season) query.s = season;
+  let standings: any[] = [];
+  let usedSource = "thesportsdb";
 
-  const res = await theSportsDBGetV1<any>("lookuptable.php", query);
-  const rows = Array.isArray((res as any)?.table) ? (res as any).table : [];
+  if (hasFootballDataId(numericLeagueId)) {
+    try {
+      const fdRows = await getFootballdataStandings(numericLeagueId, params.season ? Number(params.season) : undefined);
+      if (fdRows.length > 0) {
+        standings = fdRows;
+        usedSource = "footballdata";
+      }
+    } catch (e) {
+      console.warn("[Standings] Footballdata fetch failed, falling back to TheSportsDB", e);
+    }
+  }
 
-  const standings = rows.map(mapTSDBRowToStanding);
+  if (usedSource === "thesportsdb") {
+    const season = params.season ? String(params.season) : undefined;
+    const query: Record<string, string> = { l: leagueId };
+    if (season) query.s = season;
+
+    const res = await theSportsDBGetV1<any>("lookuptable.php", query);
+    const rawRows = tableFromResponse(res);
+    const rows = filterToGroupStageRows(rawRows);
+    standings = rows.map(mapTSDBRowToStanding);
+  }
 
   return {
     get: "",
@@ -109,5 +170,5 @@ export async function getStandings(
         },
       },
     ],
-  } as ApiFootballResponse<StandingsResponseItem[]>;
+  } as TheSportsDBResponse<StandingsResponseItem[]>;
 }

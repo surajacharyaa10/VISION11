@@ -44,6 +44,48 @@ const nextConfig = {
                 port: '',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'npr.brightspotcdn.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'npr-brightspot.s3.amazonaws.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'www.thesportsdb.com',
+                port: '',
+                pathname: '/images/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'r2.thesportsdb.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'images.unsplash.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'footballdata.io',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'imgs.search.brave.com',
+                port: '',
+                pathname: '/**',
+            },
         ],
 
     },

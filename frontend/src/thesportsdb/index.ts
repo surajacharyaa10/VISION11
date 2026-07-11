@@ -10,3 +10,4 @@ export * from "./injuries";
 export * from "./fixtures";
 export * from "./standings";
 export * from "./client";
+export * from "./footballdata";
