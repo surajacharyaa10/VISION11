@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 type League = {
     id: number;
@@ -356,39 +357,41 @@ export default function LeagueTabs({ league, leagueInfo, standings, events, erro
                                 const awayScore = ev.intAwayScore !== null && ev.intAwayScore !== undefined ? Number(ev.intAwayScore) : null;
 
                                 return (
-                                    <div key={ev.idEvent} className="bg-[#0d1117] rounded-xl border border-white/5 p-5 hover:border-emerald-500/30 transition">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <span className="text-gray-400 text-xs">{formatEventDate(ev.dateEvent, ev.strTime)}</span>
-                                            <span className={`${status.color} px-3 py-1 rounded-full text-xs font-semibold`}>{status.label}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3 flex-1">
-                                                {ev.strHomeTeamBadge && (
-                                                    <img src={ev.strHomeTeamBadge} alt={ev.strHomeTeam} className="w-10 h-10 object-contain" />
-                                                )}
-                                                <span className="font-medium text-sm truncate">{ev.strHomeTeam}</span>
+                                    <Link href={`/fixtures/${ev.idEvent}`} key={ev.idEvent} className="block">
+                                        <div className="bg-[#0d1117] rounded-xl border border-white/5 p-5 hover:border-emerald-500/30 transition cursor-pointer">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <span className="text-gray-400 text-xs">{formatEventDate(ev.dateEvent, ev.strTime)}</span>
+                                                <span className={`${status.color} px-3 py-1 rounded-full text-xs font-semibold`}>{status.label}</span>
                                             </div>
-                                            {isUpcoming ? (
-                                                <span className="text-gray-500 font-bold mx-4">VS</span>
-                                            ) : (
-                                                <div className="flex items-center gap-2 mx-4">
-                                                    <span className="text-2xl font-bold text-white">{homeScore ?? "-"}</span>
-                                                    <span className="text-gray-500 font-bold">-</span>
-                                                    <span className="text-2xl font-bold text-white">{awayScore ?? "-"}</span>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3 flex-1">
+                                                    {ev.strHomeTeamBadge && (
+                                                        <img src={ev.strHomeTeamBadge} alt={ev.strHomeTeam} className="w-10 h-10 object-contain" />
+                                                    )}
+                                                    <span className="font-medium text-sm truncate">{ev.strHomeTeam}</span>
                                                 </div>
-                                            )}
-                                            <div className="flex items-center gap-3 flex-1 justify-end">
-                                                <span className="font-medium text-sm truncate">{ev.strAwayTeam}</span>
-                                                {ev.strAwayTeamBadge && (
-                                                    <img src={ev.strAwayTeamBadge} alt={ev.strAwayTeam} className="w-10 h-10 object-contain" />
-                                                 )}
-                                             </div>
-                                         </div>
-                                         {ev.strVenue && (
-                                             <p className="text-gray-500 text-xs mt-3">🏟 {ev.strVenue}</p>
-                                         )}
-                                     </div>
-                                 );
+                                                {isUpcoming ? (
+                                                    <span className="text-gray-500 font-bold mx-4">VS</span>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 mx-4">
+                                                        <span className="text-2xl font-bold text-white">{homeScore ?? "-"}</span>
+                                                        <span className="text-gray-500 font-bold">-</span>
+                                                        <span className="text-2xl font-bold text-white">{awayScore ?? "-"}</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-3 flex-1 justify-end">
+                                                    <span className="font-medium text-sm truncate">{ev.strAwayTeam}</span>
+                                                    {ev.strAwayTeamBadge && (
+                                                        <img src={ev.strAwayTeamBadge} alt={ev.strAwayTeam} className="w-10 h-10 object-contain" />
+                                                     )}
+                                                  </div>
+                                              </div>
+                                              {ev.strVenue && (
+                                                  <p className="text-gray-500 text-xs mt-3">🏟 {ev.strVenue}</p>
+                                              )}
+                                          </div>
+                                    </Link>
+                                );
                              })
                          )}
                      </div>

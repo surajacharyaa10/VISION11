@@ -36,36 +36,12 @@ export function getEvent(params?: GetEventParams): Promise<TheSportsDBResponse<T
   return theSportsDBGetV1<TheSportsDBEvent[]>("lookupevent.php", params ? { id: String(params.id) } : undefined);
 }
 
-export interface GetEventResultsParams extends QueryParams {
+export interface GetEventTVParams extends QueryParams {
   id?: number | string;
 }
 
-export function getEventResults(params?: GetEventResultsParams): Promise<TheSportsDBResponse<TheSportsDBEvent[]>> {
-  return theSportsDBGetV1<TheSportsDBEvent[]>("eventresults.php", params ? { id: String(params.id) } : undefined);
-}
-
-export interface GetEventTimelineParams extends QueryParams {
-  id?: number | string;
-}
-
-export function getEventTimeline(params?: GetEventTimelineParams): Promise<TheSportsDBResponse<any[]>> {
-  return theSportsDBGetV1<any[]>("lookupeventtimeline.php", params ? { id: String(params.id) } : undefined);
-}
-
-export interface GetEventStatsParams extends QueryParams {
-  id?: number | string;
-}
-
-export function getEventStats(params?: GetEventStatsParams): Promise<TheSportsDBResponse<any[]>> {
-  return theSportsDBGetV1<any[]>("lookupeventstats.php", params ? { id: String(params.id) } : undefined);
-}
-
-export interface GetEventLineupParams extends QueryParams {
-  id?: number | string;
-}
-
-export function getEventLineup(params?: GetEventLineupParams): Promise<TheSportsDBResponse<any[]>> {
-  return theSportsDBGetV1<any[]>("lookuplineup.php", params ? { id: String(params.id) } : undefined);
+export function getEventTV(params?: GetEventTVParams): Promise<TheSportsDBResponse<any[]>> {
+  return theSportsDBGetV1<any[]>("lookuptv.php", params ? { id: String(params.id) } : undefined);
 }
 
 export interface SearchEventsParams extends QueryParams {
@@ -92,4 +68,36 @@ export interface GetEventsLastParams extends QueryParams {
 
 export function getEventsLast(params?: GetEventsLastParams): Promise<TheSportsDBResponse<TheSportsDBEvent[]>> {
   return theSportsDBGetV1<TheSportsDBEvent[]>("eventslast.php", params ? { id: String(params.id) } : undefined);
+}
+
+export interface GetEventResultsParams extends QueryParams {
+  id?: number | string;
+}
+
+export function getEventResults(params?: GetEventResultsParams): Promise<TheSportsDBResponse<any[]>> {
+  return theSportsDBGetV1<any[]>("eventresults.php", params ? { id: String(params.id) } : undefined);
+}
+
+export interface GetEventTimelineParams extends QueryParams {
+  id?: number | string;
+}
+
+export function getEventTimeline(params?: GetEventTimelineParams): Promise<TheSportsDBResponse<any[]>> {
+  return theSportsDBGetV1<any[]>("lookupeventtimeline.php", params ? { id: String(params.id) } : undefined);
+}
+
+export interface GetEventStatsParams extends QueryParams {
+  id?: number | string;
+}
+
+export function getEventStats(params?: GetEventStatsParams): Promise<TheSportsDBResponse<any[]>> {
+  return theSportsDBGetV1<any[]>("lookupeventstats.php", params ? { id: String(params.id) } : undefined);
+}
+
+export interface GetEventLineupParams extends QueryParams {
+  id?: number | string;
+}
+
+export function getEventLineup(params?: GetEventLineupParams): Promise<TheSportsDBResponse<any[]>> {
+  return theSportsDBGetV1<any[]>("lookuplineup.php", params ? { id: String(params.id) } : undefined);
 }

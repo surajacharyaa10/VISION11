@@ -1,38 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { Fixture } from "@/thesportsdb/fixtures";
 import { Leagues } from "@/data/leagues";
+import Link from "next/link";
 
 
 function pad(value: number): string {
-  return String(value).padStart(2, "0");
+    return String(value).padStart(2, "0");
 }
 
 function formatFixtureDate(dateStr: string) {
-  const date = new Date(dateStr);
+    const date = new Date(dateStr);
 
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
-  const hours = pad(date.getUTCHours());
-  const minutes = pad(date.getUTCMinutes());
-  const time = `${hours}:${minutes}`;
+    const hours = pad(date.getUTCHours());
+    const minutes = pad(date.getUTCMinutes());
+    const time = `${hours}:${minutes}`;
 
-  if (date.toDateString() === today.toDateString()) {
-    return `Today • ${time}`;
-  }
+    if (date.toDateString() === today.toDateString()) {
+        return `Today • ${time}`;
+    }
 
-  if (date.toDateString() === tomorrow.toDateString()) {
-    return `Tomorrow • ${time}`;
-  }
+    if (date.toDateString() === tomorrow.toDateString()) {
+        return `Tomorrow • ${time}`;
+    }
 
-  const month = date.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
-  const day = date.getUTCDate();
+    const month = date.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+    const day = date.getUTCDate();
 
-  return `${month} ${day} • ${time}`;
+    return `${month} ${day} • ${time}`;
 }
 
 
@@ -84,9 +84,9 @@ function getStatusBadge(fixture: Fixture) {
 
 
 export default function FixtureFilters({
-    fixtures
+    fixtures,
 }: {
-    fixtures: Fixture[]
+    fixtures: Fixture[];
 }) {
 
 
@@ -294,42 +294,41 @@ export default function FixtureFilters({
                     ) : (
 
 
-                            filtered.map(match => {
+                        filtered.map(match => {
 
-                                const league = Leagues.find((l) => l.theSportsDBId === match.league.id);
-                                const status =
-                                    getStatusBadge(match);
+                            const league = Leagues.find((l) => l.theSportsDBId === match.league.id);
+                            const status =
+                                getStatusBadge(match);
 
 
-                                const leagueLogo =
-                                    league?.logo ||
-                                    match.league.logo ||
-                                    "https://via.placeholder.com/32?text=?";
+                            const leagueLogo =
+                                league?.logo ||
+                                match.league.logo ||
+                                "https://via.placeholder.com/32?text=?";
 
-                                const homeLogo =
-                                    match.teams.home.logo ||
-                                    "https://via.placeholder.com/64?text=?";
+                            const homeLogo =
+                                match.teams.home.logo ||
+                                "https://via.placeholder.com/64?text=?";
 
-                                const awayLogo =
-                                    match.teams.away.logo ||
-                                    "https://via.placeholder.com/64?text=?";
+                            const awayLogo =
+                                match.teams.away.logo ||
+                                "https://via.placeholder.com/64?text=?";
 
 
 
                             return (
-
                                 <Link
                                     href={`/fixtures/${match.fixture.id}`}
                                     key={match.fixture.id}
                                     className="
-            bg-[#151b2b]
-            rounded-2xl
-            p-5
-            border border-white/5
-            hover:border-green-500/40
-            transition
-            block
-            "
+                                        bg-[#151b2b]
+                                        rounded-2xl
+                                        p-5
+                                        border border-white/5
+                                        hover:border-green-500/40
+                                        transition
+                                        block
+                                    "
                                 >
 
 

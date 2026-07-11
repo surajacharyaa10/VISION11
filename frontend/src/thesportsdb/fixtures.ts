@@ -231,17 +231,37 @@ export async function getFixtures(
   };
 
   if (params?.id) {
-    const res = await theSportsDBGetV1<any>("lookupevent.php", { id: String(params.id) }, options);
-    const ev = Array.isArray((res as any)?.response) ? (res as any).response[0] : null;
-    if (ev) {
-      fixtures = [mapTSDBEventToFixture(ev)];
+    try {
+      const res = await theSportsDBGetV1<any>("lookupevent.php", { id: String(params.id) }, options);
+      const arr = Array.isArray((res as any)?.response) ? (res as any).response : [];
+      const ev = arr[0] ?? null;
+      if (ev) {
+        fixtures = [mapTSDBEventToFixture(ev)];
+        return {
+          get: "",
+          parameters: params ?? {},
+          errors: [],
+          results: 1,
+          paging: { current: 1, total: 1 },
+          response: fixtures,
+        } as TheSportsDBResponse<Fixture[]>;
+      }
       return {
         get: "",
         parameters: params ?? {},
         errors: [],
-        results: 1,
+        results: 0,
         paging: { current: 1, total: 1 },
-        response: fixtures,
+        response: [],
+      } as TheSportsDBResponse<Fixture[]>;
+    } catch {
+      return {
+        get: "",
+        parameters: params ?? {},
+        errors: [],
+        results: 0,
+        paging: { current: 1, total: 1 },
+        response: [],
       } as TheSportsDBResponse<Fixture[]>;
     }
   }

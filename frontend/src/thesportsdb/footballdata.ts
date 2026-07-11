@@ -304,6 +304,29 @@ export interface FootballdataPlayersResponse {
   };
 }
 
+export async function getFootballdataTeamPlayers(teamId: number | string): Promise<FootballdataPlayer[]> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/players`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Team players request failed: ${res.status} ${res.statusText}`);
+      return [];
+    }
+
+    const json = (await res.json()) as FootballdataPlayersResponse;
+    return Array.isArray(json?.data?.players) ? json.data.players : [];
+  } catch {
+    return [];
+  }
+}
+
 export interface FootballdataTeamStatsResponse {
   success: boolean;
   data: {
@@ -494,6 +517,29 @@ export interface FootballdataTeamStatsResponse {
   };
 }
 
+export async function getFootballdataTeamStats(teamId: number | string): Promise<FootballdataTeamStatsResponse | null> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/stats`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Team stats request failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+
+    const json = (await res.json()) as any;
+    return json?.data ?? json;
+  } catch {
+    return null;
+  }
+}
+
 export interface FootballdataTeamDetailsResponse {
   success: boolean;
   data: {
@@ -536,49 +582,165 @@ export async function getFootballdataTeam(teamId: number | string): Promise<Foot
   }
 }
 
-export async function getFootballdataTeamStats(teamId: number | string): Promise<FootballdataTeamStatsResponse | null> {
+export interface FootballdataMatchEvent {
+  event_id: number;
+  match_id: number;
+  type: string;
+  detail: string;
+  time: { elapsed: number; extra?: number };
+  player: { player_id: number; player_name: string };
+  assist?: { player_id: number; player_name: string };
+  team: { team_id: number; team_name: string };
+}
+
+export interface FootballdataMatchStat {
+  type: string;
+  value: number | string;
+  team: { team_id: number; team_name: string };
+}
+
+export interface FootballdataMatchDetail {
+  match_id: number;
+  match_date: string;
+  status: string;
+  league: { league_id: number; name: string };
+  home_team: { team_id: number; team_name: string; team_logo?: string };
+  away_team: { team_id: number; team_name: string; team_logo?: string };
+  score: {
+    home: number;
+    away: number;
+    total_goals: number;
+    halftime: { home: number; away: number };
+  };
+  venue?: { stadium_name?: string; stadium_location?: string };
+  events?: FootballdataMatchEvent[];
+  stats?: FootballdataMatchStat[];
+}
+
+export async function getFootballdataMatchDetail(matchId: number | string): Promise<FootballdataMatchDetail | null> {
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return null;
 
   try {
-    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/stats`;
+    const url = `${FOOTBALLDATA_BASE}/matches/${matchId}`;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${apiKey}` },
-      next: { revalidate: 300 },
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
-      console.error(`[Footballdata] Team stats request failed: ${res.status} ${res.statusText}`);
+      console.error(`[Footballdata] Match detail request failed: ${res.status} ${res.statusText}`);
       return null;
     }
 
     const json = (await res.json()) as any;
-    return json?.data ?? json;
+    return json?.data ?? json ?? null;
   } catch {
     return null;
   }
 }
 
-export async function getFootballdataTeamPlayers(teamId: number | string): Promise<FootballdataPlayer[]> {
+export async function getFootballdataMatchEvents(matchId: number | string): Promise<FootballdataMatchEvent[]> {
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return [];
 
   try {
-    const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/players`;
+    const url = `${FOOTBALLDATA_BASE}/matches/${matchId}/events`;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${apiKey}` },
-      next: { revalidate: 300 },
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
-      console.error(`[Footballdata] Team players request failed: ${res.status} ${res.statusText}`);
+      console.error(`[Footballdata] Match events request failed: ${res.status} ${res.statusText}`);
       return [];
     }
 
-    const json = (await res.json()) as FootballdataPlayersResponse;
-    return Array.isArray(json?.data?.players) ? json.data.players : [];
+    const json = (await res.json()) as any;
+    const events = Array.isArray(json?.data?.events) ? json.data.events : Array.isArray(json) ? json : [];
+    return events;
   } catch {
     return [];
   }
 }
 
+export async function getFootballdataMatchStats(matchId: number | string): Promise<FootballdataMatchStat[]> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const url = `${FOOTBALLDATA_BASE}/matches/${matchId}/stats`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Match stats request failed: ${res.status} ${res.statusText}`);
+      return [];
+    }
+
+    const json = (await res.json()) as any;
+    const stats = Array.isArray(json?.data?.stats) ? json.data.stats : Array.isArray(json) ? json : [];
+    return stats;
+  } catch {
+    return [];
+  }
+}
+
+export async function searchFootballdataMatches(fixture: any): Promise<FootballdataMatch | null> {
+  const apiKey = process.env.FOOTBALLDATA_API_KEY;
+  if (!apiKey) return null;
+
+  const dateStr = fixture?.fixture?.date ? fixture.fixture.date.split("T")[0] : null;
+  const homeName = fixture?.teams?.home?.name || "";
+  const awayName = fixture?.teams?.away?.name || "";
+  const leagueId = fixture?.league?.id;
+
+  if (!dateStr || !homeName || !awayName) return null;
+
+  const footballDataId = getFootballdataLeagueId(leagueId);
+
+  try {
+    let url = `${FOOTBALLDATA_BASE}/matches?date=${dateStr}`;
+    if (footballDataId) {
+      url += `&league_id=${footballDataId}`;
+    }
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      console.error(`[Footballdata] Match search failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+
+    const json = await res.json();
+    let matches: FootballdataMatch[] = [];
+
+    if (Array.isArray(json)) {
+      matches = json;
+    } else if (Array.isArray(json?.matches)) {
+      matches = json.matches;
+    } else if (json?.data?.matches && Array.isArray(json.data.matches)) {
+      matches = json.data.matches;
+    } else if (json?.data && Array.isArray(json.data)) {
+      matches = json.data;
+    }
+
+    const lowerHome = homeName.toLowerCase();
+    const lowerAway = awayName.toLowerCase();
+
+    const found = matches.find((m) => {
+      const mHome = (m.home_team?.team_name || "").toLowerCase();
+      const mAway = (m.away_team?.team_name || "").toLowerCase();
+      return mHome === lowerHome && mAway === lowerAway;
+    });
+
+    return found || null;
+  } catch {
+    return null;
+  }
+}

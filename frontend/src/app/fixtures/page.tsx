@@ -1,7 +1,6 @@
 import { getFixtures } from "@/thesportsdb/fixtures";
 import type { Fixture } from "@/thesportsdb/fixtures";
 import { Leagues } from "@/data/leagues";
-import Link from "next/link";
 import FixtureFilters from "./components/FixtureFilters";
 
 export default async function Fixtures() {
