@@ -107,7 +107,7 @@ async function v1Raw<T>(endpoint: string, params?: QueryParams, options?: Reques
           arrayResult = json;
         } else if (json && typeof json === "object") {
           objectResult = json;
-          const arrKeys = ["events", "teams", "players", "venues", "table", "timeline", "lineups", "eventstats", "leagues", "results", "playerstats", "honours", "formerteams", "contracts", "milestones", "sidelined", "injuries", "predictions", "odds", "bookmakers", "bets", "tv"];
+          const arrKeys = ["events", "teams", "players", "venues", "table", "timeline", "lineups", "eventstats", "leagues", "results", "playerstats", "honours", "formerteams", "contracts", "milestones", "sidelined", "injuries", "predictions", "odds", "bookmakers", "bets", "tv", "team"];
           for (const k of arrKeys) {
             if (Array.isArray(json[k])) {
               arrayResult = json[k];

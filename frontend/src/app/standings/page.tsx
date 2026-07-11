@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getStandings, isLikelyTruncated } from "@/thesportsdb";
 import { getFootballdataSeasons } from "@/thesportsdb/footballdata";
 import { Leagues } from "@/data/leagues";
@@ -73,11 +74,12 @@ function StandingsTable({ teams }: { teams: any[] }) {
             </div>
 
             {teams.map((team, idx) => (
-                <TeamRow
-                    key={team.team?.id ?? idx}
-                    team={team}
-                    index={idx}
-                />
+                <Link key={team.team?.id ?? idx} href={`/teams/${team.team?.id}`} className="contents">
+                    <TeamRow
+                        team={team}
+                        index={idx}
+                    />
+                </Link>
             ))}
         </div>
     );

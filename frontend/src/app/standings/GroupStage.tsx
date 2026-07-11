@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import TeamLogo from "./TeamLogo";
 
 interface StandingTeam {
@@ -114,10 +115,11 @@ export default function GroupStage({ teams, groupName }: GroupStageProps) {
                     const indicatorColor = getQualificationColor(qualification);
 
                     return (
-                        <div
-                            key={team.team?.id ?? index}
-                            className="grid grid-cols-12 gap-2 items-center px-3 py-2.5 border-b border-white/5 hover:bg-white/5 transition text-sm relative"
-                        >
+                        <Link href={`/teams/${team.team?.id}`} className="contents">
+                            <div
+                                key={team.team?.id ?? index}
+                                className="grid grid-cols-12 gap-2 items-center px-3 py-2.5 border-b border-white/5 hover:bg-white/5 transition text-sm relative"
+                            >
                             {indicatorColor !== 'transparent' && (
                                 <div
                                     className="absolute left-0 top-0 bottom-0 w-1"
@@ -150,6 +152,7 @@ export default function GroupStage({ teams, groupName }: GroupStageProps) {
                                 {team.points ?? 0}
                             </div>
                         </div>
+                        </Link>
                     );
                 })}
             </div>

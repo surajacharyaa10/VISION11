@@ -10,9 +10,8 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Fixtures", href: "/fixtures" },
   { label: "Standings", href: "/standings" },
+  { label: "Teams", href: "/teams" },
   { label: "Players", href: "/players" },
-  { label: "Transfers", href: "/transfers" },
-  { label: "Predictions", href: "/predictions" },
   { label: "Livestreamplayer", href: "/Livestreamplayer" },
   { label: "AI Analysis", href: "/AiAnalysis" },
 ];

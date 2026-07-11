@@ -10,7 +10,7 @@ import {
   Tv2,
   CalendarDays,
   Users2,
-  LineChart,
+  Shield,
   Globe,
   Zap,
   Flame
@@ -102,22 +102,22 @@ export default async function Home() {
 
       {/* Feature Grid Hub */}
       <section className="grid grid-cols-2 gap-3">
-        {/* Predictions */}
+        {/* Teams */}
         <Link
-          href="/predictions"
+          href="/teams"
           className="group relative flex flex-col justify-between p-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/30 hover:bg-neutral-900/60 hover:border-emerald-500/30 transition-all duration-300"
         >
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/10">
-              <LineChart className="h-5 w-5" />
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">
+              <Shield className="h-5 w-5" />
             </div>
-            <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-amber-400 transition-colors" />
+            <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-emerald-400 transition-colors" />
           </div>
           <div className="mt-5">
             <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white flex items-center gap-1">
-              AI Predictions
+              Teams
             </h3>
-            <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">Win probabilities, dynamic over/under matrices, and form analysis.</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">Search and explore football teams, badges, and details.</p>
           </div>
         </Link>
 
