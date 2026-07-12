@@ -6,7 +6,7 @@ import torch
 import umap
 from sklearn.cluster import KMeans
 from tqdm import tqdm
-from transformers import AutoProcessor, SiglipVisionModel
+from transformers import SiglipImageProcessor, SiglipVisionModel
 
 V = TypeVar("V")
 
@@ -55,7 +55,12 @@ class TeamClassifier:
         self.batch_size = batch_size
         self.features_model = SiglipVisionModel.from_pretrained(
             SIGLIP_MODEL_PATH).to(device)
-        self.processor = AutoProcessor.from_pretrained(SIGLIP_MODEL_PATH)
+        self.features_model.eval()
+        # Team classification only embeds images. Creating the image processor
+        # directly avoids loading SigLIP's unused text tokenizer (and its
+        # SentencePiece dependency). These are SigLIP's default preprocessing
+        # settings: 224px images normalized with mean/std of 0.5.
+        self.processor = SiglipImageProcessor()
         self.reducer = umap.UMAP(n_components=3)
         self.cluster_model = KMeans(n_clusters=2)
 
@@ -70,7 +75,9 @@ class TeamClassifier:
         Returns:
             np.ndarray: Extracted features as a numpy array.
         """
-        crops = [sv.cv2_to_pillow(crop) for crop in crops]
+        crops = [sv.cv2_to_pillow(crop) for crop in crops if crop.size]
+        if not crops:
+            return np.empty((0, 0), dtype=np.float32)
         batches = create_batches(crops, self.batch_size)
         data = []
         with torch.no_grad():
@@ -81,7 +88,7 @@ class TeamClassifier:
                 embeddings = torch.mean(outputs.last_hidden_state, dim=1).cpu().numpy()
                 data.append(embeddings)
 
-        return np.concatenate(data)
+        return np.concatenate(data, axis=0)
 
     def fit(self, crops: List[np.ndarray]) -> None:
         """
@@ -91,6 +98,10 @@ class TeamClassifier:
             crops (List[np.ndarray]): List of image crops.
         """
         data = self.extract_features(crops)
+        if len(data) < 2:
+            raise ValueError(
+                "At least two detected player crops are required to classify teams."
+            )
         projections = self.reducer.fit_transform(data)
         self.cluster_model.fit(projections)
 

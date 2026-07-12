@@ -99,7 +99,15 @@ def get_crops(frame: np.ndarray, detections: sv.Detections) -> List[np.ndarray]:
     Returns:
         List[np.ndarray]: List of cropped images.
     """
-    return [sv.crop_image(frame, xyxy) for xyxy in detections.xyxy]
+    crops = []
+    for xyxy in detections.xyxy:
+        crop = sv.crop_image(frame, xyxy)
+        # Keep one crop for every detection so classifier outputs remain aligned
+        # with the detection and tracker arrays.
+        if not crop.size:
+            crop = np.zeros((1, 1, 3), dtype=frame.dtype)
+        crops.append(crop)
+    return crops
 
 
 def resolve_goalkeepers_team_id(
@@ -125,8 +133,15 @@ def resolve_goalkeepers_team_id(
     """
     goalkeepers_xy = goalkeepers.get_anchors_coordinates(sv.Position.BOTTOM_CENTER)
     players_xy = players.get_anchors_coordinates(sv.Position.BOTTOM_CENTER)
-    team_0_centroid = players_xy[players_team_id == 0].mean(axis=0)
-    team_1_centroid = players_xy[players_team_id == 1].mean(axis=0)
+    team_0 = players_xy[players_team_id == 0]
+    team_1 = players_xy[players_team_id == 1]
+    if len(team_0) == 0 or len(team_1) == 0:
+        # A partial frame is common around cuts. Keep rendering instead of
+        # producing NaNs from an empty centroid.
+        return np.zeros(len(goalkeepers), dtype=int)
+
+    team_0_centroid = team_0.mean(axis=0)
+    team_1_centroid = team_1.mean(axis=0)
     goalkeepers_team_id = []
     for goalkeeper_xy in goalkeepers_xy:
         dist_0 = np.linalg.norm(goalkeeper_xy - team_0_centroid)
@@ -141,6 +156,8 @@ def render_radar(
     color_lookup: np.ndarray
 ) -> np.ndarray:
     mask = (keypoints.xy[0][:, 0] > 1) & (keypoints.xy[0][:, 1] > 1)
+    if mask.sum() < 4:
+        return draw_pitch(config=CONFIG)
     transformer = ViewTransformer(
         source=keypoints.xy[0][mask].astype(np.float32),
         target=np.array(CONFIG.vertices)[mask].astype(np.float32)
@@ -172,6 +189,9 @@ def render_heatmap(
     accumulated_xy_team_1: List[np.ndarray]
 ) -> np.ndarray:
     mask = (keypoints.xy[0][:, 0] > 1) & (keypoints.xy[0][:, 1] > 1)
+    radar = draw_pitch(config=CONFIG)
+    if mask.sum() < 4:
+        return radar
     transformer = ViewTransformer(
         source=keypoints.xy[0][mask].astype(np.float32),
         target=np.array(CONFIG.vertices)[mask].astype(np.float32)
@@ -185,7 +205,6 @@ def render_heatmap(
     if len(transformed_xy[color_lookup == 1]) > 0:
         accumulated_xy_team_1.append(transformed_xy[color_lookup == 1])
 
-    radar = draw_pitch(config=CONFIG)
     h, w, _ = radar.shape
     
     # Create a single float32 density map
@@ -324,7 +343,14 @@ def run_player_tracking(source_video_path: str, device: str) -> Iterator[np.ndar
         detections = sv.Detections.from_ultralytics(result)
         detections = tracker.update_with_detections(detections)
 
-        labels = [str(tracker_id) for tracker_id in detections.tracker_id]
+        # ByteTrack may not assign IDs on frames without confirmed tracks.
+        # Keep one blank label per detection for the annotator in that case.
+        tracker_ids = detections.tracker_id
+        labels = (
+            [str(tracker_id) for tracker_id in tracker_ids]
+            if tracker_ids is not None
+            else ["" for _ in range(len(detections))]
+        )
 
         annotated_frame = frame.copy()
         annotated_frame = ELLIPSE_ANNOTATOR.annotate(annotated_frame, detections)
@@ -380,7 +406,12 @@ def run_team_classification(source_video_path: str, device: str) -> Iterator[np.
                 goalkeepers_team_id.tolist() +
                 [REFEREE_CLASS_ID] * len(referees)
         )
-        labels = [str(tracker_id) for tracker_id in detections.tracker_id]
+        tracker_ids = detections.tracker_id
+        labels = (
+            [str(tracker_id) for tracker_id in tracker_ids]
+            if tracker_ids is not None
+            else ["" for _ in range(len(detections))]
+        )
 
         annotated_frame = frame.copy()
         annotated_frame = ELLIPSE_ANNOTATOR.annotate(
@@ -430,7 +461,14 @@ def run_radar(source_video_path: str, device: str) -> Iterator[np.ndarray]:
             goalkeepers_team_id.tolist() +
             [REFEREE_CLASS_ID] * len(referees)
         )
-        labels = [str(tracker_id) for tracker_id in detections.tracker_id]
+        # A frame can contain detections before ByteTrack confirms an ID.
+        # Use blank labels until IDs are available.
+        tracker_ids = detections.tracker_id
+        labels = (
+            [str(tracker_id) for tracker_id in tracker_ids]
+            if tracker_ids is not None
+            else ["" for _ in range(len(detections))]
+        )
 
         annotated_frame = frame.copy()
         annotated_frame = ELLIPSE_ANNOTATOR.annotate(
@@ -497,7 +535,12 @@ def run_heatmap(source_video_path: str, device: str) -> Iterator[np.ndarray]:
             goalkeepers_team_id.tolist() +
             [REFEREE_CLASS_ID] * len(referees)
         )
-        labels = [str(tracker_id) for tracker_id in detections.tracker_id]
+        tracker_ids = detections.tracker_id
+        labels = (
+            [str(tracker_id) for tracker_id in tracker_ids]
+            if tracker_ids is not None
+            else ["" for _ in range(len(detections))]
+        )
 
         annotated_frame = frame.copy()
         annotated_frame = ELLIPSE_ANNOTATOR.annotate(

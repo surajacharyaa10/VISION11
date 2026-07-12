@@ -16,7 +16,11 @@ const Status: React.FC<Props> = ({
   const [statusMatch, setStatusMatch] = useState<string>("TODAY");
 
   const todayMatches = [...matchesList, ...matchesListFinished].filter(
-    (data) => data.status === "TIMED",
+    (data) =>
+      data.status === "TIMED" ||
+      data.status === "SCHEDULED" ||
+      data.status === "IN_PLAY" ||
+      data.status === "PAUSED",
   );
 
   const finishedMatches = [...matchesList, ...matchesListFinished].filter(

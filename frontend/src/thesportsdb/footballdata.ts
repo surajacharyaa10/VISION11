@@ -142,6 +142,9 @@ export async function getFootballdataSeasons(leagueId: number): Promise<Football
 
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return [];
+  if (apiKey === process.env.API_TOKEN) {
+    console.warn("[Footballdata] FOOTBALLDATA_API_KEY appears to be set to the same value as API_TOKEN (football-data.org). These are different services and require different API keys. Get your footballdata.io key from https://footballdata.io");
+  }
 
   const url = `${FOOTBALLDATA_BASE}/leagues/${footballDataId}/seasons`;
   const res = await fetch(url, {
@@ -170,6 +173,9 @@ export async function getFootballdataStandings(leagueId: number, seasonId?: numb
 
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return [];
+  if (apiKey === process.env.API_TOKEN) {
+    console.warn("[Footballdata] FOOTBALLDATA_API_KEY appears to be set to the same value as API_TOKEN (football-data.org). These are different services and require different API keys. Get your footballdata.io key from https://footballdata.io");
+  }
 
   let url = `${FOOTBALLDATA_BASE}/leagues/${footballDataId}/standings`;
   if (seasonId) {
@@ -307,6 +313,9 @@ export interface FootballdataPlayersResponse {
 export async function getFootballdataTeamPlayers(teamId: number | string): Promise<FootballdataPlayer[]> {
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return [];
+  if (apiKey === process.env.API_TOKEN) {
+    console.warn("[Footballdata] FOOTBALLDATA_API_KEY appears to be set to the same value as API_TOKEN (football-data.org). These are different services and require different API keys. Get your footballdata.io key from https://footballdata.io");
+  }
 
   try {
     const url = `${FOOTBALLDATA_BASE}/teams/${teamId}/players`;
@@ -643,6 +652,9 @@ export async function getFootballdataMatchDetail(matchId: number | string): Prom
 export async function getFootballdataMatchEvents(matchId: number | string): Promise<FootballdataMatchEvent[]> {
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return [];
+  if (apiKey === process.env.API_TOKEN) {
+    console.warn("[Footballdata] FOOTBALLDATA_API_KEY appears to be set to the same value as API_TOKEN (football-data.org). These are different services and require different API keys. Get your footballdata.io key from https://footballdata.io");
+  }
 
   try {
     const url = `${FOOTBALLDATA_BASE}/matches/${matchId}/events`;
@@ -667,6 +679,9 @@ export async function getFootballdataMatchEvents(matchId: number | string): Prom
 export async function getFootballdataMatchStats(matchId: number | string): Promise<FootballdataMatchStat[]> {
   const apiKey = process.env.FOOTBALLDATA_API_KEY;
   if (!apiKey) return [];
+  if (apiKey === process.env.API_TOKEN) {
+    console.warn("[Footballdata] FOOTBALLDATA_API_KEY appears to be set to the same value as API_TOKEN (football-data.org). These are different services and require different API keys. Get your footballdata.io key from https://footballdata.io");
+  }
 
   try {
     const url = `${FOOTBALLDATA_BASE}/matches/${matchId}/stats`;

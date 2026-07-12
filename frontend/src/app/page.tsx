@@ -32,7 +32,10 @@ export default async function Home() {
 
   const liveCount =
     matchesData?.filter(
-      (m: any) => m?.status === "LIVE" || m?.status === "IN_PLAY"
+      (m: any) =>
+        m?.status === "IN_PLAY" ||
+        m?.status === "PAUSED" ||
+        m?.status === "LIVE"
     )?.length ?? 0;
 
   // Mock stats count for advanced platform aesthetics
