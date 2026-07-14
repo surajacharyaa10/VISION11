@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getStandings, isLikelyTruncated } from "@/thesportsdb";
 import { getFootballdataSeasons } from "@/thesportsdb/footballdata";
 import { Leagues } from "@/data/leagues";
+import { Trophy } from "lucide-react";
 import TeamLogo from "./TeamLogo";
 import LeagueSelect from "./LeagueSelect";
 import GroupStage from "./GroupStage";
@@ -117,25 +119,36 @@ export default async function StandingPage({ searchParams }: PageProps) {
     const hasMultipleGroups = groupEntries.length > 1;
 
     return (
-        <main className="min-h-screen bg-[#070b14] text-white">
-            <div className="border-b border-white/10">
-                <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <main className="min-h-screen text-white">
+            {/* Header */}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/15">
+                        <Trophy className="w-5 h-5 text-amber-400" />
+                    </div>
                     <div>
-                        <h1 className="text-3xl font-black mb-1">
+                        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
                             {league?.name ?? "League"} Standings
                         </h1>
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-xs text-neutral-500 mt-0.5">
                             Live rankings powered by Vision11 AI
                         </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
+                </div>
+                {/* Selectors */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <Suspense fallback={<div className="h-10 w-40 rounded-xl bg-white/5 animate-pulse" />}>
                         <LeagueSelect current={leagueId} leagues={domesticLeagues} />
-                        {seasons.length > 0 && <SeasonSelect seasons={seasons} />}
-                    </div>
+                    </Suspense>
+                    {seasons.length > 0 && (
+                        <Suspense fallback={<div className="h-10 w-28 rounded-xl bg-white/5 animate-pulse" />}>
+                            <SeasonSelect seasons={seasons} />
+                        </Suspense>
+                    )}
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+            <div className="space-y-6">
                 {error && (
                     <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-red-300">
                         {error}

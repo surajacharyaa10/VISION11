@@ -35,12 +35,12 @@ export default function PlayersClient({
     league,
     season,
 }: PlayersClientProps) {
-    const router = useRouter();
-
+    // Pure client-side search — no router.push, no page reload
     const [search, setSearch] = useState(initialSearch);
     const [selected, setSelected] = useState<PlayerCard | null>(null);
+    const router = useRouter();
 
-    // Client-side filtering for the currently loaded batch (fast, no refetch).
+    // Always filter on the client side — no navigation needed
     const filtered = useMemo(
         () =>
             initialPlayers.filter((p) =>
@@ -48,20 +48,6 @@ export default function PlayersClient({
             ),
         [initialPlayers, search]
     );
-
-    function handleSearchSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        const trimmed = search.trim();
-
-        // Delegate to the server when the query is long enough to hit the
-        // global /players/profiles search endpoint (min 3 chars here, API
-        // itself requires >= 4, so we still guard server-side too).
-        if (trimmed.length >= 3) {
-            router.push(`/players?search=${encodeURIComponent(trimmed)}`);
-        } else if (trimmed.length === 0) {
-            router.push(`/players?league=${league}&season=${season}`);
-        }
-    }
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black p-6 text-white">
@@ -75,12 +61,12 @@ export default function PlayersClient({
                 </div>
             </div>
 
-            {/* Search */}
-            <form onSubmit={handleSearchSubmit} className="relative max-w-xl mb-10">
+            {/* Search — plain div, no form, no page reload */}
+            <div className="relative max-w-xl mb-10">
                 <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search player (min 3 letters, press Enter)..."
+                    placeholder="Search player by name..."
                     className="
           w-full
           bg-white/10
@@ -94,7 +80,16 @@ export default function PlayersClient({
           focus:ring-2 focus:ring-blue-500
           "
                 />
-            </form>
+                {search && (
+                    <button
+                        onClick={() => setSearch("")}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-lg"
+                        aria-label="Clear search"
+                    >
+                        ✕
+                    </button>
+                )}
+            </div>
 
             {errorMessage && (
                 <div className="mb-8 rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-red-300">

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
+import PlayersTable from "./components/PlayersTable";
+import StatsPanel from "./components/StatsPanel";
+
 interface Team {
     idTeam: string;
     strTeam: string;
@@ -83,13 +86,13 @@ export default function TeamTab({ team, initialTab, previousEvents, nextEvents, 
                         <span className="text-5xl font-bold text-gray-600">{team.strTeam?.charAt(0) || (team as any).team_name?.charAt(0)}</span>
                     )}
                 </div>
-                                <div>
-                                    <h1 className="text-3xl font-bold">{team.strTeam || (team as any).team_name}</h1>
-                                    <p className="text-gray-400 mt-1">{team.strCountry || (team as any).country} <span className="text-gray-500">•</span> {team.strLeague || (team as any).name || (team as any).league?.name}</p>
-                                </div>
-                            </div>
+                <div>
+                    <h1 className="text-3xl font-bold">{team.strTeam || (team as any).team_name}</h1>
+                    <p className="text-gray-400 mt-1">{(team as any).strCountry || (team as any).country} <span className="text-gray-500">•</span> {(team as any).strLeague || (team as any).name || (team as any).league?.name}</p>
+                </div>
+            </div>
 
-            <div className="flex gap-2 border-b border-white/10 mb-6">
+            <div className="flex gap-2 border-b border-white/10 mb-6 overflow-x-auto scrollbar-hide">
                 {tabs.map((tab) => {
                     const href = `?tab=${tab.key}${opponent && tab.key === "h2h" ? `&opponent=${opponent}` : ""}`;
                     if (tab.key === "h2h" && !opponent) return null;
@@ -97,7 +100,7 @@ export default function TeamTab({ team, initialTab, previousEvents, nextEvents, 
                         <Link
                             key={tab.key}
                             href={href}
-                            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${currentTab === tab.key
+                            className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${currentTab === tab.key
                                 ? "border-emerald-500 text-white"
                                 : "border-transparent text-gray-400 hover:text-white"
                                 }`}
@@ -252,145 +255,6 @@ export default function TeamTab({ team, initialTab, previousEvents, nextEvents, 
                 )}
                 {currentTab === "stats" && <StatsPanel fdStats={fdStats} />}
             </div>
-        </div>
-    );
-}
-
-function PlayersTable({ team, players }: { team: Team; players?: any[] }) {
-    const list = players && players.length > 0 ? players : [];
-    return (
-        <div className="text-gray-400">
-            {list.length === 0 ? (
-                <p>No players available.</p>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-white/10 text-left text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="pb-2 pr-4">Player</th>
-                                <th className="pb-2 pr-4">Position</th>
-                                <th className="pb-2 pr-4">Nationality</th>
-                                <th className="pb-2 pr-4">Age</th>
-                                <th className="pb-2 pr-4 text-right">Apps</th>
-                                <th className="pb-2 pr-4 text-right">Goals</th>
-                                <th className="pb-2 pr-4 text-right">Assists</th>
-                                <th className="pb-2 text-right">Minutes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {list.map((p: any) => (
-                                <tr key={p.player_id} className="border-b border-white/5 hover:bg-white/5 transition">
-                                    <td className="py-3 pr-4">
-                                        <div className="flex items-center gap-3">
-                                            {p.player_image ? (
-                                                <img src={p.player_image} alt={p.known_name || p.player_name} className="w-8 h-8 rounded-full object-cover" />
-                                            ) : (
-                                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
-                                                    {(p.known_name || p.player_name).charAt(0)}
-                                                </div>
-                                            )}
-                                            <span className="font-medium text-white">{p.known_name || p.player_name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-3 pr-4 text-gray-300">{p.position}</td>
-                                    <td className="py-3 pr-4 text-gray-300">{p.nationality}</td>
-                                    <td className="py-3 pr-4 text-gray-300">{p.age ?? "-"}</td>
-                                    <td className="py-3 pr-4 text-right text-gray-300">{p.stats?.appearances ?? "-"}</td>
-                                    <td className="py-3 pr-4 text-right text-gray-300">{p.stats?.goals ?? "-"}</td>
-                                    <td className="py-3 pr-4 text-right text-gray-300">{p.stats?.assists ?? "-"}</td>
-                                    <td className="py-3 text-right text-gray-300">{p.stats?.minutes ?? "-"}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
-    );
-}
-
-function NestedStatBlock({ label, data }: { label: string; data: any }) {
-    if (!data || typeof data !== "object") return null;
-    const entries = Object.entries(data).filter(([, v]) => v !== null && v !== undefined && v !== "");
-    if (entries.length === 0) return null;
-    return (
-        <div className="mt-2 rounded-lg border border-white/5 bg-white/5 px-3 py-2">
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">{label}</div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                {entries.map(([k, v]) => (
-                    <div key={k} className="flex justify-between text-gray-300">
-                        <span className="text-gray-500 capitalize">{k.replace(/_/g, " ")}</span>
-                        <span className="font-medium text-white">{String(v)}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-function StatsPanel({ fdStats }: { fdStats: any }) {
-    if (!fdStats) {
-        return <p className="text-gray-400">No stats available.</p>;
-    }
-
-    const summary = fdStats.summary || {};
-    const flatItems: { title: string; value: number | string }[] = [
-        { title: "Matches", value: summary.matches_played ?? "-" },
-        { title: "Wins", value: summary.wins ?? "-" },
-        { title: "Draws", value: summary.draws ?? "-" },
-        { title: "Losses", value: summary.losses ?? "-" },
-        { title: "Goals For", value: summary.goals_for ?? "-" },
-        { title: "Goals Against", value: summary.goals_against ?? "-" },
-        { title: "Goal Difference", value: summary.goal_difference ?? "-" },
-        { title: "Win %", value: summary.win_percentage ?? "-" },
-        { title: "Draw %", value: summary.draw_percentage ?? "-" },
-        { title: "Loss %", value: summary.loss_percentage ?? "-" },
-        { title: "Points per Game", value: summary.points_per_game ?? "-" },
-    ];
-
-    const nestedBlocks: { title: string; data: any }[] = [];
-    const maybeNest = (label: string, val: any) => {
-        if (val && typeof val === "object") nestedBlocks.push({ title: label, data: val });
-    };
-
-    maybeNest("Home / Away", fdStats.home_away);
-    maybeNest("Goals", fdStats.goals);
-    maybeNest("Clean Sheets", fdStats.clean_sheets);
-    maybeNest("Failed to Score", fdStats.failed_to_score);
-    maybeNest("Both Teams to Score", fdStats.both_teams_to_score);
-    maybeNest("Corners", fdStats.corners);
-    maybeNest("Cards", fdStats.cards);
-    maybeNest("Shots", fdStats.shots);
-    maybeNest("xG", fdStats.xg);
-    maybeNest("Possession", fdStats.possession);
-    maybeNest("Fouls", fdStats.fouls);
-    maybeNest("Goal Timing", fdStats.goal_timing);
-    maybeNest("Form", fdStats.form);
-    maybeNest("Set Pieces", fdStats.set_pieces);
-    maybeNest("Offsides", fdStats.offsides);
-    maybeNest("Goal Timing (Minutes)", fdStats.goal_timing_minutes);
-    maybeNest("Correct Score", fdStats.correct_score);
-    maybeNest("Special Markets", fdStats.special_markets);
-    maybeNest("Penalties", fdStats.penalties);
-
-    return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {flatItems.map((item) => (
-                    <div key={item.title} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                        <div className="text-xs text-gray-400 uppercase tracking-wider">{item.title}</div>
-                        <div className="mt-1 text-2xl font-bold text-white">{typeof item.value === "number" ? Number(item.value).toLocaleString() : item.value}</div>
-                    </div>
-                ))}
-            </div>
-
-            {nestedBlocks.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {nestedBlocks.map((block) => (
-                        <NestedStatBlock key={block.title} label={block.title} data={block.data} />
-                    ))}
-                </div>
-            )}
         </div>
     );
 }

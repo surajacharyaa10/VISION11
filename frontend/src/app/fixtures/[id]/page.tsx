@@ -122,7 +122,7 @@ export default async function FixtureDetail({ params }: { params: Promise<{ id: 
                         strVenue: fdDetail.venue?.stadium_name || "",
                         strLocation: fdDetail.venue?.stadium_location || "",
                         strCountry: fdDetail.league?.name || "",
-                        strSeason: fdDetail.season?.year || "",
+                        strSeason: (fdDetail as any).season?.year || "",
                         dateEvent: fdDetail.match_date || "",
                         strTime: "",
                         strDescriptionEN: "",
