@@ -149,13 +149,15 @@ export default function PlayersClient({
                                 <b>{player.country}</b>
                             </div>
 
-                            {/* Internal player detail route */}
-                            <Link
-                                href={`/players/${player.id}`}
+                            {/* External player detail route (TheSportsDB) */}
+                            <a
+                                href={`https://www.thesportsdb.com/player/${player.id}-${encodeURIComponent(player.name.replace(/\s+/g, '-').toLowerCase())}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="mt-4 block w-full bg-blue-600 hover:bg-blue-500 rounded-xl py-3 font-semibold text-center text-white transition-colors"
                             >
                                 View Profile
-                            </Link>
+                            </a>
                         </div>
                     </div>
                 ))}
