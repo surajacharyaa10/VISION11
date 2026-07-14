@@ -58,7 +58,7 @@ function getStatusBadge(fixture: { fixture: { status: { short: string; long: str
     return { label: fixture.fixture.status.long || short, color: "bg-rose-500/10 text-rose-400 border border-rose-500/20" };
 }
 
-export default function FixtureDetail({ fixture, rawEvent, h2h, lineups, statistics, events, tvData, eventResults, venue }: {
+export default function FixtureDetail({ fixture, rawEvent, h2h = [], lineups = [], statistics = [], events = [], tvData = [], eventResults = [], venue = [], error, listFallback }: {
     fixture: any;
     rawEvent: any;
     h2h: any[];
@@ -69,27 +69,26 @@ export default function FixtureDetail({ fixture, rawEvent, h2h, lineups, statist
     eventResults: any[];
     venue: any[];
     error?: string | null;
+    listFallback?: {
+        home: string | null; homeLogo: string | null;
+        away: string | null; awayLogo: string | null;
+        league: string | null; leagueLogo: string | null;
+        date: string | null; venue: string | null;
+        homeGoals: number | null; awayGoals: number | null;
+        status: string | null;
+    } | null;
 }) {
     const [activeTab, setActiveTab] = useState<TabKey>("overview");
 
-    if (!fixture) {
-        return (
-            <div className="min-h-screen bg-[#070a13] text-white p-6 flex flex-col items-center justify-center">
-                <p className="text-xl font-semibold text-gray-400 mb-4">Fixture not found</p>
-                <Link href="/fixtures" className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl transition text-sm">
-                    <ArrowLeft className="w-4 h-4" /> Back to Fixtures
-                </Link>
-            </div>
-        );
-    }
-
-    const status = getStatusBadge(fixture);
-    const homeLogo = fixture.teams.home.logo;
-    const awayLogo = fixture.teams.away.logo;
-    const league = Leagues.find((l) => l.theSportsDBId === fixture.league.id);
-    const leagueLogo = league?.logo || fixture.league.logo;
-    const venueInfo = venue.find((v: any) => v.strVenue === fixture.fixture.venue.name) || venue[0];
-    const formattedDate = formatFixtureDate(fixture.fixture.date);
+    const status = fixture ? getStatusBadge(fixture) : null;
+    const homeLogo = fixture?.teams.home.logo || listFallback?.homeLogo || "";
+    const awayLogo = fixture?.teams.away.logo || listFallback?.awayLogo || "";
+    const league = fixture ? Leagues.find((l) => l.theSportsDBId === fixture.league.id) : null;
+    const leagueLogo = league?.logo || fixture?.league.logo || listFallback?.leagueLogo || "";
+    const venueInfo = fixture
+        ? venue.find((v: any) => v.strVenue === fixture.fixture.venue.name) || venue[0]
+        : venue[0] ?? null;
+    const formattedDate = fixture ? formatFixtureDate(fixture.fixture.date) : (listFallback?.date ? formatFixtureDate(listFallback.date) : "");
 
     return (
         <div className="min-h-screen bg-[#070a13] text-slate-100 antialiased max-w-7xl mx-auto p-4 md:p-8 space-y-6">
@@ -97,7 +96,7 @@ export default function FixtureDetail({ fixture, rawEvent, h2h, lineups, statist
                 <ArrowLeft className="w-4 h-4" /> Back to Fixtures
             </Link>
 
-            {/* Match Header Component */}
+            {/* Match Header — always shown, uses listFallback → rawEvent as fallback when fixture is null */}
             <MatchHeader
                 fixture={fixture}
                 status={status}
@@ -105,6 +104,8 @@ export default function FixtureDetail({ fixture, rawEvent, h2h, lineups, statist
                 homeLogo={homeLogo}
                 awayLogo={awayLogo}
                 formattedDate={formattedDate}
+                rawEvent={rawEvent}
+                listFallback={listFallback}
             />
 
             {/* Tabs & Content */}
@@ -125,7 +126,7 @@ export default function FixtureDetail({ fixture, rawEvent, h2h, lineups, statist
 
                 <div className="p-4 md:p-6 space-y-6">
                     {activeTab === "overview" && (
-                        <OverviewTab rawEvent={rawEvent} venueInfo={venueInfo} />
+                        <OverviewTab rawEvent={rawEvent} venueInfo={venueInfo} listFallback={listFallback} />
                     )}
 
                     {activeTab === "lineup" && (

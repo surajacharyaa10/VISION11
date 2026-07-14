@@ -5,7 +5,6 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import News from "./components/News";
-import MobileBottomNav from "./components/MobileBottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,11 +25,11 @@ export default function RootLayout({
         <Navbar />
 
         {/* Main content — push down by navbar height, up by mobile bottom nav */}
-        <main className="pt-14 md:pt-16 pb-20 md:pb-0 px-2 md:px-8 lg:px-12 xl:px-16 text-textPrimary min-h-screen">
+        <main className="pt-14 md:pt-16 px-2 md:px-8 lg:px-12 xl:px-16 text-textPrimary min-h-screen">
           <div className="flex flex-col lg:flex-row gap-4 py-4 items-start">
 
-            {/* Sidebar — sticky on desktop */}
-            <aside className="hidden lg:block lg:w-[280px] xl:w-[300px] shrink-0 sticky top-[72px] self-start max-h-[calc(100vh-80px)] overflow-y-auto">
+            {/* Sidebar — sticky on desktop, fixed height so internal scroll works */}
+            <aside className="hidden lg:flex lg:w-[280px] xl:w-[300px] shrink-0 sticky top-[72px] self-start h-[calc(100vh-88px)]">
               <Sidebar />
             </aside>
 
@@ -40,15 +39,13 @@ export default function RootLayout({
             </div>
 
             {/* News panel — sticky on xl */}
-            <aside className="hidden xl:block w-[350px] shrink-0 sticky top-[72px] self-start max-h-[calc(100vh-80px)] overflow-y-auto">
+            <aside className="hidden xl:flex w-[350px] shrink-0 sticky top-[72px] self-start h-[calc(100vh-88px)] overflow-y-auto">
               <News />
             </aside>
 
           </div>
         </main>
 
-        {/* Mobile bottom navigation */}
-        <MobileBottomNav />
       </body>
     </html>
   );

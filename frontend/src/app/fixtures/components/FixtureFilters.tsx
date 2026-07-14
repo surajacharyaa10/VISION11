@@ -198,7 +198,7 @@ export default function FixtureFilters({ fixtures }: { fixtures: Fixture[] }) {
 
                         return (
                             <Link
-                                href={`/fixtures/${match.fixture.id}`}
+                                href={`/fixtures/${match.fixture.id}?home=${encodeURIComponent(match.teams.home.name)}&homeLogo=${encodeURIComponent(homeLogo)}&away=${encodeURIComponent(match.teams.away.name)}&awayLogo=${encodeURIComponent(awayLogo)}&league=${encodeURIComponent(match.league.name)}&leagueLogo=${encodeURIComponent(leagueLogo)}&date=${encodeURIComponent(match.fixture.date)}&venue=${encodeURIComponent(match.fixture.venue.name ?? '')}&homeGoals=${match.goals.home ?? ''}&awayGoals=${match.goals.away ?? ''}&status=${encodeURIComponent(match.fixture.status.short)}`}
                                 key={match.fixture.id}
                                 className={`
                                     group block rounded-2xl border transition-all duration-300

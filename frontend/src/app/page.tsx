@@ -1,5 +1,3 @@
-import { getMatchesFootballFinished, getMatchesFootball } from "@/api";
-import Status from "./components/Status";
 import TopMatchesCarousel from "./components/TopMatchesCarousel";
 import Link from "next/link";
 import {
@@ -12,66 +10,67 @@ import {
   CalendarDays,
   Users2,
   Shield,
-  Globe,
+  Trophy,
+  ArrowRight,
+  PlayCircle,
+  Database
 } from "lucide-react";
 
-export default async function Home() {
-  const getData = await getMatchesFootball();
-  const getDataFinished = await getMatchesFootballFinished();
-  const matchesData = getData?.matches?.slice(0, 5) ?? [];
-  const matchesDataFinished = getDataFinished?.matches?.slice(0, 5) ?? [];
-
+export default function Home() {
   const nd = new Date();
   const dateConvert = nd.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
+    weekday: "long",
+    month: "long",
     day: "numeric",
     year: "numeric",
   });
 
-  const liveCount =
-    matchesData?.filter(
-      (m: any) =>
-        m?.status === "IN_PLAY" ||
-        m?.status === "PAUSED" ||
-        m?.status === "LIVE"
-    )?.length ?? 0;
-
   return (
-    <div className="w-full max-w-[720px] mx-auto px-4 md:px-0 pb-32 space-y-6">
+    <div className="w-full max-w-[760px] mx-auto px-4 md:px-0 pb-32 space-y-8 animate-in fade-in duration-500">
+      
+      {/* ── HERO SECTION ── */}
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#0a0f1a] via-[#111827] to-[#1e1b4b] px-6 py-10 shadow-2xl shadow-indigo-900/20">
+        {/* Decorative Orbs */}
+        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-500/20 blur-[100px]" />
+        <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-indigo-500/20 blur-[100px]" />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-800/60 bg-gradient-to-b from-neutral-900/90 via-neutral-950 to-neutral-950 px-6 py-7 shadow-2xl backdrop-blur-md">
-        {/* Glow Effects */}
-        <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-emerald-500/10 blur-[80px]" />
-        <div className="pointer-events-none absolute -left-12 -bottom-12 h-44 w-44 rounded-full bg-blue-500/10 blur-[80px]" />
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 rounded-full bg-white/10 border border-white/5 px-3 py-1 text-xs font-semibold text-emerald-300 backdrop-blur-sm shadow-sm">
+              <CalendarDays className="h-3.5 w-3.5" />
+              {dateConvert}
+            </span>
+            <span className="flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-400 backdrop-blur-sm animate-pulse shadow-sm">
+              <Activity className="h-3.5 w-3.5" />
+              Live Season
+            </span>
+          </div>
 
-        <div className="relative space-y-4">
-          {/* Header Row */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-bold tracking-wider text-emerald-400 uppercase bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-md">
-                  {dateConvert}
-                </span>
-                {liveCount > 0 && (
-                  <span className="flex items-center gap-1.5 rounded-md bg-red-500/10 border border-red-500/20 px-2 py-0.5 text-[11px] font-bold text-red-400 animate-pulse">
-                    <Activity className="h-3 w-3" />
-                    {liveCount} In-Play
-                  </span>
-                )}
-              </div>
-              <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
-                Today's Matches
-              </h1>
-              <p className="text-xs text-neutral-400 font-medium">
-                Real-time tracking, AI analytics & historical squad databases.
-              </p>
-            </div>
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
+              The Ultimate <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                Football Companion
+              </span>
+            </h1>
+            <p className="text-sm md:text-base text-slate-400 font-medium max-w-[400px] leading-relaxed">
+              Experience the beautiful game with real-time analytics, AI tactical breakdowns, and historical squad databases.
+            </p>
+          </div>
 
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-emerald-500/80 shadow-inner backdrop-blur">
-              <TrendingUp className="h-7 w-7" />
-            </div>
+          <div className="flex items-center gap-3 pt-2">
+            <Link
+              href="/fixtures"
+              className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5"
+            >
+              Match Center <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/Livestreamplayer"
+              className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold px-6 py-3 rounded-xl transition-all hover:border-white/20"
+            >
+              <PlayCircle className="w-4 h-4 text-rose-400" /> Watch Live
+            </Link>
           </div>
         </div>
       </section>
@@ -79,131 +78,107 @@ export default async function Home() {
       {/* ── TOP MATCHES CAROUSEL ── */}
       <TopMatchesCarousel />
 
-      {/* Feature Grid Hub */}
-      <section className="grid grid-cols-2 gap-3">
-        {/* Teams */}
+      {/* ── FEATURE GRID ── */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Teams & Squads */}
         <Link
           href="/teams"
-          className="group relative flex flex-col justify-between p-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/30 hover:bg-neutral-900/60 hover:border-emerald-500/30 transition-all duration-300"
+          className="group relative flex flex-col p-5 rounded-[1.5rem] border border-white/5 bg-[#0f1423] hover:bg-[#141b2e] transition-all duration-300 hover:border-emerald-500/30 overflow-hidden"
         >
-          <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">
-              <Shield className="h-5 w-5" />
-            </div>
-            <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-emerald-400 transition-colors" />
+          <div className="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
+            <ChevronRight className="h-5 w-5 text-emerald-400" />
           </div>
-          <div className="mt-5">
-            <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white flex items-center gap-1">
-              Teams
-            </h3>
-            <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">Search and explore football teams, badges, and details.</p>
+          <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 w-fit mb-4">
+            <Shield className="h-6 w-6 text-emerald-400" />
           </div>
+          <h3 className="text-lg font-bold text-white mb-1.5">Teams & Squads</h3>
+          <p className="text-xs text-slate-400 leading-relaxed pr-6">
+            Dive into comprehensive club profiles. Explore active rosters, historical performance, and detailed team statistics.
+          </p>
         </Link>
 
-        {/* Watch Live */}
-        <Link
-          href="/Livestreamplayer"
-          className="group relative flex flex-col justify-between p-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/30 hover:bg-neutral-900/60 hover:border-red-500/30 transition-all duration-300"
-        >
-          <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/10">
-              <Tv2 className="h-5 w-5" />
-            </div>
-            <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-red-400 transition-colors" />
-          </div>
-          <div className="mt-5">
-            <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white">Match Stream</h3>
-            <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">Watch live events, multi-cam feeds, and match logs.</p>
-          </div>
-        </Link>
-
-        {/* Fixtures */}
-        <Link
-          href="/fixtures"
-          className="group relative flex flex-col justify-between p-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/30 hover:bg-neutral-900/60 hover:border-blue-500/30 transition-all duration-300"
-        >
-          <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/10">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-            <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-blue-400 transition-colors" />
-          </div>
-          <div className="mt-5">
-            <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white">Match Center</h3>
-            <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">Fixtures, historical logs, and group breakdowns.</p>
-          </div>
-        </Link>
-
-        {/* Players */}
+        {/* Player Database */}
         <Link
           href="/players"
-          className="group relative flex flex-col justify-between p-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/30 hover:bg-neutral-900/60 hover:border-purple-500/30 transition-all duration-300"
+          className="group relative flex flex-col p-5 rounded-[1.5rem] border border-white/5 bg-[#0f1423] hover:bg-[#141b2e] transition-all duration-300 hover:border-purple-500/30 overflow-hidden"
         >
-          <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/10">
-              <Users2 className="h-5 w-5" />
-            </div>
-            <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-purple-400 transition-colors" />
+          <div className="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
+            <ChevronRight className="h-5 w-5 text-purple-400" />
           </div>
-          <div className="mt-5">
-            <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white">Player Database</h3>
-            <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">Scouting metrics, fitness records, and index evaluations.</p>
+          <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 w-fit mb-4">
+            <Users2 className="h-6 w-6 text-purple-400" />
           </div>
+          <h3 className="text-lg font-bold text-white mb-1.5">Player Database</h3>
+          <p className="text-xs text-slate-400 leading-relaxed pr-6">
+            Scouting metrics, fitness records, and comprehensive career histories for every player on the pitch.
+          </p>
+        </Link>
+
+        {/* Global Standings */}
+        <Link
+          href="/standings"
+          className="group relative flex flex-col p-5 rounded-[1.5rem] border border-white/5 bg-[#0f1423] hover:bg-[#141b2e] transition-all duration-300 hover:border-amber-500/30 overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
+            <ChevronRight className="h-5 w-5 text-amber-400" />
+          </div>
+          <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 w-fit mb-4">
+            <Trophy className="h-6 w-6 text-amber-400" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-1.5">Global Standings</h3>
+          <p className="text-xs text-slate-400 leading-relaxed pr-6">
+            Track league tables, cup brackets, and golden boot races from the top competitions worldwide.
+          </p>
+        </Link>
+
+        {/* Live Matches */}
+        <Link
+          href="/fixtures"
+          className="group relative flex flex-col p-5 rounded-[1.5rem] border border-white/5 bg-[#0f1423] hover:bg-[#141b2e] transition-all duration-300 hover:border-blue-500/30 overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
+            <ChevronRight className="h-5 w-5 text-blue-400" />
+          </div>
+          <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 w-fit mb-4">
+            <Database className="h-6 w-6 text-blue-400" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-1.5">Match Analytics</h3>
+          <p className="text-xs text-slate-400 leading-relaxed pr-6">
+            Minute-by-minute updates, expected goals (xG), passing networks, and head-to-head records.
+          </p>
         </Link>
       </section>
 
-      {/* AI Analysis CTA */}
+      {/* ── AI ANALYSIS CTA ── */}
       <Link
         href="/AiAnalysis"
-        className="group relative block overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/10 via-neutral-900/60 to-neutral-950 p-4 shadow-lg transition-all duration-300 hover:border-emerald-500/40 hover:shadow-emerald-500/5"
+        className="group relative block overflow-hidden rounded-[2rem] border border-indigo-500/20 bg-gradient-to-br from-[#0f1423] to-[#1e1b4b]/40 p-6 shadow-xl transition-all duration-500 hover:border-indigo-500/40 hover:shadow-indigo-500/10"
       >
-        <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-emerald-500/5 to-transparent transition-transform duration-1000 group-hover:translate-x-[100%]" />
-        <div className="relative flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 shadow-inner transition-transform group-hover:scale-105">
-              <UploadCloud className="h-6 w-6 text-emerald-400" />
+        <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-indigo-500/5 to-transparent transition-transform duration-1000 group-hover:translate-x-[100%]" />
+        
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-indigo-400/30 bg-gradient-to-b from-indigo-500/20 to-indigo-500/5 shadow-inner transition-transform group-hover:scale-105">
+              <UploadCloud className="h-7 w-7 text-indigo-400" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <p className="text-sm font-bold text-white tracking-wide">Upload Match Footage</p>
-                <span className="flex items-center gap-0.5 rounded bg-emerald-500/20 px-1 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
-                  <Sparkles className="h-2.5 w-2.5" /> Smart AI
+              <div className="flex items-center gap-2 mb-1.5">
+                <h3 className="text-lg font-bold text-white tracking-wide">Vision AI Analyst</h3>
+                <span className="flex items-center gap-1 rounded bg-indigo-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-indigo-300 border border-indigo-500/20">
+                  <Sparkles className="h-2.5 w-2.5" /> Beta
                 </span>
               </div>
-              <p className="mt-0.5 text-xs text-neutral-400 leading-relaxed">
-                Tactical blueprints, player metrics, heatmaps & highlights.
+              <p className="text-xs md:text-sm text-indigo-200/70 leading-relaxed max-w-[400px]">
+                Upload match footage or tactical clips to instantly generate heatmaps, player tracking, and tactical blueprints using our proprietary AI model.
               </p>
             </div>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 transition-colors group-hover:bg-emerald-500 group-hover:text-neutral-950">
-            <ChevronRight className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-sm font-bold text-indigo-400 group-hover:text-indigo-300 transition-colors ml-14 md:ml-0">
+            Launch Engine <ArrowRight className="w-4 h-4" />
           </div>
         </div>
       </Link>
-
-      {/* Match Status */}
-      <div className="bg-neutral-950/40 border border-neutral-900/80 rounded-2xl p-3 md:p-4 shadow-inner">
-        <div className="flex items-center gap-2 mb-3">
-          <Globe className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-sm font-bold text-white uppercase tracking-wide">Today's Results</h2>
-        </div>
-        <Status
-          matchesList={matchesData}
-          matchesListFinished={matchesDataFinished}
-        />
-      </div>
-
-      {/* View More */}
-      <div className="text-center">
-        <Link
-          href="/fixtures"
-          className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-6 py-3 rounded-xl transition-colors shadow-lg shadow-emerald-500/20"
-        >
-          View All Fixtures
-          <ChevronRight className="h-4 w-4" />
-        </Link>
-      </div>
-
+      
     </div>
   );
 }

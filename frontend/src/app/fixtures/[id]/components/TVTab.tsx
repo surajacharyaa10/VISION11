@@ -5,7 +5,7 @@ interface TVTabProps {
 }
 
 export default function TVTab({ tvData }: TVTabProps) {
-    if (!tvData || tvData.length === 0) {
+    if (!Array.isArray(tvData) || tvData.length === 0) {
         return <p className="text-xs text-gray-400 text-center py-4">No broadcast info</p>;
     }
 

@@ -4,10 +4,49 @@ import { MapPin } from "lucide-react";
 interface OverviewTabProps {
     rawEvent: any;
     venueInfo: any;
+    listFallback?: any;
 }
 
-export default function OverviewTab({ rawEvent, venueInfo }: OverviewTabProps) {
+function formatDateFull(dateStr: string) {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
+}
+
+export default function OverviewTab({ rawEvent, venueInfo, listFallback }: OverviewTabProps) {
+    // If no backend event data exists, try to show fallback data gracefully
     if (!rawEvent) {
+        if (listFallback?.venue || listFallback?.date) {
+            return (
+                <div className="space-y-4">
+                    {listFallback.venue && (
+                        <div className="bg-white/5 rounded-xl p-4">
+                            <span className="text-gray-400 text-xs block mb-1">Venue</span>
+                            <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-emerald-400" />
+                                <span className="text-white font-medium">{listFallback.venue}</span>
+                            </div>
+                        </div>
+                    )}
+                    {listFallback.date && (
+                        <div className="bg-white/5 rounded-xl p-4">
+                            <span className="text-gray-400 text-xs block mb-1">Date</span>
+                            <span className="text-white font-medium">
+                                {formatDateFull(listFallback.date)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            );
+        }
         return <p className="text-xs text-gray-400 text-center py-4">No overview details available</p>;
     }
 

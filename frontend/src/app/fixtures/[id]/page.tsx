@@ -54,9 +54,25 @@ function mapFootballdataStat(stat: any) {
   return { type: stat.type || stat.name || "Stat", value: Number(stat.value) || 0 };
 }
 
-export default async function FixtureDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function FixtureDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
     const { id } = await params;
+    const sp = await searchParams;
     const fixtureId = Number(id);
+
+    // Build a fallback from list-screen query params (populated when user clicks from fixtures list)
+    const listFallback = {
+        home:       sp.home       ? decodeURIComponent(sp.home)       : null,
+        homeLogo:   sp.homeLogo   ? decodeURIComponent(sp.homeLogo)   : null,
+        away:       sp.away       ? decodeURIComponent(sp.away)       : null,
+        awayLogo:   sp.awayLogo   ? decodeURIComponent(sp.awayLogo)   : null,
+        league:     sp.league     ? decodeURIComponent(sp.league)     : null,
+        leagueLogo: sp.leagueLogo ? decodeURIComponent(sp.leagueLogo) : null,
+        date:       sp.date       ? decodeURIComponent(sp.date)       : null,
+        venue:      sp.venue      ? decodeURIComponent(sp.venue)      : null,
+        homeGoals:  sp.homeGoals  !== undefined ? Number(sp.homeGoals)  : null,
+        awayGoals:  sp.awayGoals  !== undefined ? Number(sp.awayGoals)  : null,
+        status:     sp.status     ? decodeURIComponent(sp.status)     : null,
+    };
 
     let fixture: any = null;
     let rawEvent: any = null;
@@ -72,20 +88,25 @@ export default async function FixtureDetail({ params }: { params: Promise<{ id: 
     let source = "thesportsdb";
 
     try {
-        const fixtureRes = await getFixtures({ id: fixtureId }, { next: { revalidate: 60 } }).catch((e: any) => ({ response: [] }));
+        let fixtureRes: any = { response: [] };
+        try {
+            // Use no-store to prevent caching rate limit (429) responses which would persistently return 'Fixture not found'
+            fixtureRes = await getFixtures({ id: fixtureId }, { cache: "no-store" });
+        } catch (e: any) {
+            console.error("Error fetching fixture by ID:", e.message || e);
+        }
         fixture = fixtureRes.response?.[0] ?? null;
 
         if (fixture) {
-            const [eventsRes, statsRes, lineupsRes, playersRes, h2hRes, rawEventRes, tvRes, resultsRes] = await Promise.all([
-                getFixtureEvents({ fixture: fixtureId }, { next: { revalidate: 60 } }).catch(() => ({ response: [] })),
-                getFixtureStatistics({ fixture: fixtureId }, { next: { revalidate: 60 } }).catch(() => ({ response: [] })),
-                getFixtureLineups({ fixture: fixtureId }, { next: { revalidate: 60 } }).catch(() => ({ response: [] })),
-                getFixturePlayers({ fixture: fixtureId }, { next: { revalidate: 60 } }).catch(() => ({ response: [] })),
-                getHeadToHead({ h2h: `${fixture.teams.home.id}-${fixture.teams.away.id}` }, { next: { revalidate: 3600 } }).catch(() => ({ response: [] })),
-                getEvent({ id: fixtureId }).catch(() => ({ response: [] })),
-                getEventTV({ id: fixtureId }).catch(() => ({ response: [] })),
-                getEventResults({ id: fixtureId }).catch(() => ({ response: [] })),
-            ]);
+            // Fetch sequentially to avoid TheSportsDB free tier 429 rate limits
+            const eventsRes = await getFixtureEvents({ fixture: fixtureId }, { cache: "no-store" }).catch(() => ({ response: [] }));
+            const statsRes = await getFixtureStatistics({ fixture: fixtureId }, { cache: "no-store" }).catch(() => ({ response: [] }));
+            const lineupsRes = await getFixtureLineups({ fixture: fixtureId }, { cache: "no-store" }).catch(() => ({ response: [] }));
+            const playersRes = await getFixturePlayers({ fixture: fixtureId }, { cache: "no-store" }).catch(() => ({ response: [] }));
+            const h2hRes = await getHeadToHead({ h2h: `${fixture.teams.home.id}-${fixture.teams.away.id}` }, { cache: "no-store" }).catch(() => ({ response: [] }));
+            const rawEventRes = await getEvent({ id: fixtureId }).catch(() => ({ response: [] }));
+            const tvRes = await getEventTV({ id: fixtureId }).catch(() => ({ response: [] }));
+            const resultsRes = await getEventResults({ id: fixtureId }).catch(() => ({ response: [] }));
 
             events = eventsRes.response ?? [];
             statistics = statsRes.response ?? [];
@@ -162,6 +183,7 @@ export default async function FixtureDetail({ params }: { params: Promise<{ id: 
             eventResults={eventResults}
             venue={venue}
             error={error}
+            listFallback={listFallback}
         />
     );
 }

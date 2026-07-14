@@ -311,16 +311,13 @@ export async function getPlayerDetail(
 ): Promise<PlayerDetail> {
   const pid = String(id);
 
-  const [playerRes, honoursRes, milestonesRes, v1ContractsRes, resultsRes, statsRes] =
-    await Promise.all([
-      theSportsDBGetV1<any>("lookupplayer.php", { id: pid }, options),
-      theSportsDBGetV1<any>("lookuphonours.php", { id: pid }, options),
-      theSportsDBGetV1<any>("lookupmilestones.php", { id: pid }, options),
-      // Full contract history (all clubs) comes from the v1 endpoint.
-      theSportsDBGetV1<any>("lookupcontracts.php", { id: pid }, options).catch(() => null),
-      theSportsDBGetV1<any>("playerresults.php", { id: pid }, options),
-      theSportsDBGetV1<any>("lookupplayerstats.php", { id: pid }, options),
-    ]);
+  // Fetch sequentially to avoid TheSportsDB free tier 429 rate limits
+  const playerRes = await theSportsDBGetV1<any>("lookupplayer.php", { id: pid }, options);
+  const honoursRes = await theSportsDBGetV1<any>("lookuphonours.php", { id: pid }, options).catch(() => null);
+  const milestonesRes = await theSportsDBGetV1<any>("lookupmilestones.php", { id: pid }, options).catch(() => null);
+  const v1ContractsRes = await theSportsDBGetV1<any>("lookupcontracts.php", { id: pid }, options).catch(() => null);
+  const resultsRes = await theSportsDBGetV1<any>("playerresults.php", { id: pid }, options).catch(() => null);
+  const statsRes = await theSportsDBGetV1<any>("lookupplayerstats.php", { id: pid }, options).catch(() => null);
 
   // The current contract also comes from the v2 endpoint, which takes the id
   // as a path parameter: /api/v2/json/lookup/player_contracts/{id}

@@ -5,7 +5,7 @@ interface H2HTabProps {
 }
 
 export default function H2HTab({ h2h }: H2HTabProps) {
-    if (!h2h || h2h.length === 0) {
+    if (!Array.isArray(h2h) || h2h.length === 0) {
         return <p className="text-xs text-gray-400 text-center py-4">No head-to-head matches</p>;
     }
 

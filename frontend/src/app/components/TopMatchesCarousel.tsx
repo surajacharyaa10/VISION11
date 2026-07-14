@@ -254,10 +254,18 @@ export default function TopMatchesCarousel() {
         className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {TOP_MATCHES.map((match) => (
+        {TOP_MATCHES.map((match) => {
+          // If the match doesn't have a real fixture ID in its href, use its string ID as a dummy
+          const fixtureIdMatch = match.fixtureHref?.match(/\/fixtures\/(\d+)/);
+          const fixtureId = fixtureIdMatch ? fixtureIdMatch[1] : match.id;
+          
+          // Build the fallback URL query parameters so the Fixture Details screen can show names/logos even without API data
+          const detailUrl = `/fixtures/${fixtureId}?home=${encodeURIComponent(match.home.name)}&homeLogo=${encodeURIComponent(match.home.logo)}&away=${encodeURIComponent(match.away.name)}&awayLogo=${encodeURIComponent(match.away.logo)}&league=${encodeURIComponent(match.competition)}&date=${encodeURIComponent(match.date)}`;
+
+          return (
           <Link
             key={match.id}
-            href={match.fixtureHref ?? "/fixtures"}
+            href={detailUrl}
             className={`
               flex-none w-[220px] sm:w-[240px] snap-start
               relative overflow-hidden rounded-2xl
@@ -265,7 +273,7 @@ export default function TopMatchesCarousel() {
               bg-gradient-to-br ${match.gradient}
               p-4 group
               hover:border-white/20 hover:scale-[1.02]
-              transition-all duration-300
+              transition-all duration-300 text-left
             `}
             style={{ boxShadow: `0 0 24px ${match.accent}18` }}
           >
@@ -336,7 +344,8 @@ export default function TopMatchesCarousel() {
               <span className="text-[9px] text-neutral-500 font-medium uppercase tracking-wide">Marquee</span>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

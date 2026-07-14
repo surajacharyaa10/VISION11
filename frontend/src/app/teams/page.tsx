@@ -1,6 +1,5 @@
 import { theSportsDBGetV1 } from "@/thesportsdb/client";
 import type { TheSportsDBTeam } from "@/thesportsdb/types";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -75,9 +74,11 @@ export default async function TeamsPage({
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {teams.map((team) => (
-                        <Link
+                        <a
                             key={team.idTeam}
-                            href={`/teams/${team.idTeam}`}
+                            href={`https://www.thesportsdb.com/team/${team.idTeam}/${encodeURIComponent(team.strTeam)}`}
+                            target="_blank"
+                            rel="noreferrer"
                             className="group rounded-xl border border-white/10 bg-[#151b2b] p-4 transition hover:border-emerald-500/40"
                         >
                             <div className="flex aspect-square items-center justify-center">
@@ -99,7 +100,7 @@ export default async function TeamsPage({
                             <p className="truncate text-center text-xs text-gray-400">
                                 {team.strCountry}
                             </p>
-                        </Link>
+                        </a>
                     ))}
                 </div>
             </div>
