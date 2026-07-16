@@ -5,7 +5,7 @@ interface ResultsTabProps {
 }
 
 export default function ResultsTab({ eventResults }: ResultsTabProps) {
-    if (!eventResults || eventResults.length === 0) {
+    if (!eventResults || !Array.isArray(eventResults) || eventResults.length === 0) {
         return <p className="text-xs text-gray-400 text-center py-4">No results</p>;
     }
 
